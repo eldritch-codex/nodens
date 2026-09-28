@@ -37,7 +37,7 @@ Build configurations and their options are documented in the wiki, under [Buildi
 ## Development Environment
 
 Nodens includes a Linux Dev Container using
-`ghcr.io/eldritchcodex/arch-dev:main`. Open the repository in Zed or
+`ghcr.io/eldritch-codex/arch-dev:main`. Open the repository in Zed or
 Visual Studio Code, then reopen it in the Dev Container.
 
 NVIDIA hosts need the host NVIDIA driver and NVIDIA Container Toolkit before

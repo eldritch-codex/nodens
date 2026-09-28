@@ -1,6 +1,6 @@
 {
     "name": "EldritchCodex Nodens Dev Environment",
-    "image": "ghcr.io/eldritchcodex/arch-dev:main",
+    "image": "ghcr.io/eldritch-codex/arch-dev:main",
     // Depending on your GPU vendor, select one of the following runArgs:
     // 1. NVIDIA: requires NVIDIA Container Toolkit on the host.
     "runArgs": ["--gpus=all", "--name=eldritch-codex-nodens"],

@@ -3,13 +3,13 @@
     "image": "ghcr.io/eldritchcodex/arch-dev:main",
     // Depending on your GPU vendor, select one of the following runArgs:
     // 1. NVIDIA: requires NVIDIA Container Toolkit on the host.
-    "runArgs": ["--gpus=all", "--name=eldritchcodex-arch-dev-nodens"],
+    "runArgs": ["--gpus=all", "--name=eldritch-codex-nodens"],
     // 2. Intel/AMD
     // "runArgs": [
     //     "--device=/dev/dri",
     //     "--group-add=video",
     //     "--group-add=render"
-    //     "--name=eldritchcodex-arch-dev"
+    //     "--name=eldritch-codex-nodens"
     // ],
     "remoteUser": "eldritchcodex",
     "mounts": [

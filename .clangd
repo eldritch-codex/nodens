@@ -1,7 +1,7 @@
 CompileFlags:
   # Point to the directory containing compile_commands.json
   CompilationDatabase: "build"
-  
+
   # Ensure clangd forces C++23 processing mirroring CMake settings
   Add: [
     "-std=c++23",

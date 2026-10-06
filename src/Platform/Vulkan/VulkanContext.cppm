@@ -192,10 +192,10 @@ private:
 
     GLFWwindow* m_WindowHandle{nullptr}; ///< Borrowed GLFW window owned by IWindow.
     vk::raii::Context m_Context{};       ///< Vulkan loader context.
-    vk::raii::DebugUtilsMessengerEXT m_DebugMessenger{
-        nullptr};                                       ///< Debug messenger for Vulkan validation.
     vk::raii::Instance m_Instance{nullptr};             ///< Nodens-owned Vulkan instance.
     vk::raii::SurfaceKHR m_Surface{nullptr};            ///< Nodens-owned Vulkan surface.
+    vk::raii::DebugUtilsMessengerEXT m_DebugMessenger{
+        nullptr}; ///< Debug messenger for Vulkan validation.
     vk::raii::PhysicalDevice m_PhysicalDevice{nullptr}; ///< Nodens-selected physical device.
     vk::raii::Device m_Device{nullptr};                 ///< Nodens-owned logical device.
     vk::raii::Queue m_GraphicsQueue{nullptr};           ///< Graphics and presentation queue.

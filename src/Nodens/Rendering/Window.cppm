@@ -31,7 +31,7 @@ struct FWindowProps
     unsigned int Width{1280};               ///< Initial window width in pixels.
     unsigned int Height{720};               ///< Initial window height in pixels.
     bool VSync{false};                      ///< Whether vertical synchronization is enabled.
-    EGraphicsAPI API{EGraphicsAPI::OpenGL}; ///< The graphics API to use for rendering.
+    EGraphicsAPI API{EGraphicsAPI::Vulkan}; ///< The graphics API to use for rendering.
 };
 
 /// @brief Abstract base class for a platform window.

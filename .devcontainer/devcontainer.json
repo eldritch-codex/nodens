@@ -1,0 +1,31 @@
+{
+    "name": "EldritchCodex Nodens Dev Environment",
+    "image": "ghcr.io/eldritch-codex/arch-dev:main",
+    // Depending on your GPU vendor, select one of the following runArgs:
+    // 1. NVIDIA: requires NVIDIA Container Toolkit on the host.
+    "runArgs": ["--gpus=all", "--name=eldritch-codex-nodens"],
+    // 2. Intel/AMD
+    // "runArgs": [
+    //     "--device=/dev/dri",
+    //     "--group-add=video",
+    //     "--group-add=render"
+    //     "--name=eldritch-codex-nodens"
+    // ],
+    "remoteUser": "eldritchcodex",
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
+        "source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR},type=bind"
+    ],
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}",
+        "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+        "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
+        "NVIDIA_DRIVER_CAPABILITIES": "graphics,display,utility"
+    },
+    "postCreateCommand": "cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "customizations": {
+        "zed": {
+            "extensions": ["slang"]
+        }
+    }
+}

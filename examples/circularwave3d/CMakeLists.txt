@@ -1,27 +1,15 @@
-﻿cmake_minimum_required(VERSION 3.8)
-project(circularwave3d LANGUAGES CXX)
+add_executable(example-circularwave3d
+    CircularWave3DApp.cpp
+    CircularWave3DLayer.cpp
+)
 
-# Set Nodens options
-set(ND_ENABLE_PROFILING ON)
+target_sources(example-circularwave3d
+    PRIVATE
+        FILE_SET example_modules TYPE CXX_MODULES
+        FILES
+            CircularWave3DLayer.cppm
+)
 
-# Definitions ====================================
-if(WIN32)
-    add_definitions(-DND_PLATFORM_WINDOWS)
-endif()
+target_compile_features(example-circularwave3d PUBLIC cxx_std_23)
 
-# Nodens Source files
-set(NODENS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-
-# Sinewave Source files
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/)
-file(GLOB_RECURSE SOURCE_FILES ${SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE HEADER_FILES ${SOURCE_DIR}/*.h)
-
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-
-# Include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${NODENS_DIR}/include)
-
-# Link nodens lib
-link_directories()
-target_link_libraries(${PROJECT_NAME} PRIVATE nodens)
+target_link_libraries(example-circularwave3d PRIVATE Nodens::Nodens)

@@ -1,22 +1,36 @@
-/*	Set this file as the Startup Item for CMakeLists.txt
- */
-#define MAIN_APPLICATION_FILE
+import nodens;
+import Example.CircularWave3DLayer;
+import std;
 
-#include "CircularWave3DLayer.h"
-#include "nodens.h"
+// -----------------------------------------------------------------------------
+// Step 2: Define the Application class, the root object in charge of the
+// application, managing the window, layers, and the main event loop.
+// -----------------------------------------------------------------------------
 
-// Main application layer
 class CircularWave3DApp : public Nodens::Application
 {
 public:
-    CircularWave3DApp() { PushLayer(new CircularWave3DLayer()); }
+    static inline const Nodens::FApplicationSpecification appSpecifications = {
+        .Name = "[NodensApp Example] CircularWave3D",
+        .WindowWidth = 800,
+        .WindowHeight = 600,
+        .EnableGUI = true,
+    };
 
-    CircularWave3DApp(const Nodens::WindowProps props) : Application(props) { PushLayer(new CircularWave3DLayer()); }
+    CircularWave3DApp() : Application(appSpecifications)
+    {
+        PushLayer(new CircularWave3DLayer());
+    }
 
-    ~CircularWave3DApp() {}
+    ~CircularWave3DApp() = default;
 };
 
-Nodens::Application* Nodens::CreateApplication()
+int main()
 {
-    return new CircularWave3DApp(Nodens::WindowProps("[NodensApp Example] CircularWave3D", 800, 600, false));
+    Nodens::InitializeLoggers();
+
+    auto app = CircularWave3DApp();
+    app.Run();
+
+    return 0;
 }

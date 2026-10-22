@@ -1,34 +1,58 @@
 ---
-Language:        Cpp
-Standard:        c++20
-BasedOnStyle:    LLVM
+Language: Cpp
+Standard: Latest
+BasedOnStyle: LLVM
 
-# Indentation
-IndentWidth:     4
-TabWidth:        4
-UseTab:          Never
-AccessModifierOffset: -4
+# Comments
+ReflowComments: true
+AlignTrailingComments:
+  Kind: Always # Always | Never | Leave
+  # OverEmptyLines: 1 # align across this many empty lines
+
+# Indentation and Tabs
+UseTab: Never
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 4
+IndentCaseLabels: true
+
+# Brace Style
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Line Length
+ColumnLimit: 100
+
+# Pointer and Reference Alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpacesInAngles: Never
 
 # Alignment
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
-AlignOperands:   true
-AlignTrailingComments: true
+AlignOperands: Align
 
-# Brace Wrapping
-BreakBeforeBraces: Allman
+# Classes, Namespaces, and Templates
+NamespaceIndentation: None
+AlwaysBreakTemplateDeclarations: Yes
+AccessModifierOffset: -4
 
-# C++20 Specifics
-SpaceAfterTemplateKeyword: true
-IndentRequiresClause: true
+# Empty Lines
+MaxEmptyLinesToKeep: 1
 
-# Pointer Alignment
-PointerAlignment: Left
-
-# Line Breaking
-ColumnLimit:     120
+# Others
+BreakBinaryOperations: RespectPrecedence
+AllowShortCompoundRequirementOnASingleLine: true
 BinPackArguments: false
 BinPackParameters: false
-AllowShortFunctionsOnASingleLine: Inline
 ...

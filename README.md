@@ -1,97 +1,102 @@
-![nodens-banner3](https://github.com/user-attachments/assets/1a0e2932-e99d-4432-8e26-88a350368cd7)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT) 
+![Supported platforms: Linux ](https://img.shields.io/badge/Supported%20platforms-Linux-blue.svg?style=flat-square)
+
+> ⚠️ **Development Status:** Nodens is currently in **active, experimental development** with no stable release. It serves primarily as a learning ground and playground for exploring game engine architecture and modern C++20/23 features. APIs are highly subject to change.
 
 # Introduction
 
-**Nodens** is a simple, high-performance, modern C++ framework designed for quickly developing interactive desktop applications with a graphical user interface.
-Built upon **C++23** standards, it prioritizes zero-overhead abstractions and modern architectural patterns.
+**Nodens** is an experimental C++23 framework designed for rapidly developing interactive desktop applications with an optional immediate mode graphical user interface. 
 
-The framework unifies industry-standard third-party libraries with a custom, multithreaded core, providing a robust foundation for rapid development/prototyping of graphical applications ranging from simple tools to game engines.
+It unifies excellent third-party libraries (e.g. [ImGui](https://github.com/ocornut/imgui), [ImPlot](https://github.com/epezent/implot), [ImPlot3D](https://github.com/brenocq/implot3d), [Tracy](https://github.com/wolfpld/tracy)) with a custom core that integrates 4 main systems:
+- **GLFW Windows** with both OpenGL and Vulkan backends.
+- **Layer System** that governs the application lifetime and execution flow, visual rendering priority and input event routing (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Layer-System));
+- **Event System** with InputEvent routing through the LayerStack and a pub/sub thread-safe EventBus for both immediate and queued dispatch of custom event types (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Event-System));
+- **Job System** for multithreaded task execution (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Concurrency-and-JobSystem)).
 
+Nodens follows a **module-first architecture** where public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`.
 
-# Key Features
+The framework compiles into a single **static library** that is linked to your application, ensuring the final product is a single portable executable to streamline distribution.
 
-### 🖥️ Core Architecture
-* **Modern C++ Standard:** Built using C++20/23 features (e.g. `std::jthread`, `std::stop_token`, concepts and `std::to_underlying`).
-* **Layer Stack System:** Flexible application flow control allowing for modular updates and rendering layers (e.g., overlay, game world, UI).
-* **Window Management:** cross-platform windowing and input polling via [GLFW](https://www.glfw.org/).
+# Documentation
 
-### ⚡ Concurrency & Events
-* **Multithreaded Job System:** A custom thread pool implementation utilizing C++20 `std::jthread` for automatic joining and `std::future` for asynchronous task management.
-* **Asynchronous Event Bus:** A thread-safe Publish/Subscribe system allowing decoupled communication between subsystems. Supports generic event types and lambda listeners.
+| Resource | Description |
+|----------|-------------|
+| **[Wiki](https://github.com/EldritchCodex/Nodens/wiki)** | Tutorials, architecture guides, and how-to articles |
+| **API Reference** | Doxygen-generated class and function documentation - *not yet hosted; build locally with `cmake --build build --target nodens-docs`* |
 
-### 🎨 Graphics & GUI
-* **Immediate Mode GUI:** Fully integrated [ImGui](https://github.com/ocornut/imgui) with Docking and Viewport support enabled by default.
-* **Data Visualization:** Native support for high-performance 2D and 3D plotting via [ImPlot](https://github.com/epezent/implot) and [ImPlot3D](https://github.com/brenocq/implot3d).
-* **Rendering Backend:** OpenGL context management initialized via [GLAD](https://glad.dav1d.de/).
+# Quick Start
 
-### 🛠️ Profiling & Debugging
-* **Integrated Frame Profiling:** Built-in support for [Tracy Profiler](https://github.com/wolfpld/tracy) (v0.13.0) to analyze frame time, memory usage, and lock contention in real-time.
+> 📖 For build, integration, and development-environment instructions, see the **[Getting Started](https://github.com/EldritchCodex/Nodens/wiki/Getting-Started)** wiki page.
 
+> ⚠️ **Platform limitation:** The supported and validated development environment is based on Arch Linux and currently builds Nodens for **Linux only**. Native Windows and macOS builds are not currently supported or validated.
 
-# Getting Started
+For new applications, start from the [Nodens Application Template](https://github.com/EldritchCodex/Template-NodensApp). Nodens can also be consumed from CMake with `FetchContent`; the wiki covers framework development, local checkouts, and native Linux builds.
 
-### Prerequisites
-* **C++ Compiler:** A compiler with C++23 support.
-* **CMake:** Version 3.8 or higher.
+Build configurations and their options are documented in the wiki, under [Building and Toolchain](https://github.com/EldritchCodex/Nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/EldritchCodex/Nodens/wiki/Profiling-with-Tracy).
 
-### Cloning
-To clone the repository run the command
-```shell
-git clone https://github.com/EldritchCodex/Nodens.git --recursive
-```
+## Development Environment
 
-### Example Applications
-Examples of application codes are provided in the `examples/` folder.
+Nodens includes a Linux Dev Container using
+`ghcr.io/eldritch-codex/arch-dev:main`. Open the repository in Zed or
+Visual Studio Code, then reopen it in the Dev Container.
 
-#### `circularwave3d`
+NVIDIA hosts need the host NVIDIA driver and NVIDIA Container Toolkit before
+using the default GPU configuration. Intel/AMD hosts should select the
+alternative `/dev/dri` configuration in `.devcontainer/devcontainer.json`.
 
-- **Demonstrates:** Immediate Mode GUI Rendering, 2D/3D Plotting, Profiling.
-- **Description:** A visual demo that renders real-time mathematical functions. It calculates sine and cosine waves every frame and visualizes them using **ImPlot** (for 2D graphs) and **ImPlot3D** (for 3D line plots).
+See [Getting Started](https://github.com/EldritchCodex/Nodens/wiki/Getting-Started)
+for host setup, toolkit installation, GPU configuration, and build instructions.
 
-#### `jobsystem`
+# Example Applications
 
-- **Demonstrates:** Multithreading, `std::future` integration, Non-blocking UI.
-- **Description:** A control panel for the internal thread pool. It allows the user to submit a "Heavy Calculation" (simulated by a 2-second thread sleep) to a background worker. The main thread polls the `std::future` status each frame to check for completion without freezing the GUI, updating the status text from "Processing..." to "Idle" once finished.
+Nodens includes several examples in the `examples/` directory:
 
-#### `asyncevent`
+| Example | Demonstrates |
+|---------|-------------|
+| **`circularwave3d`** | Immediate mode GUI, real-time 2D/3D plotting with ImPlot and ImPlot3D |
+| **`planetaryscan`** | Pub/Sub event bus, multi-threaded job system with thread-safe data collection, live scatter plot visualization |
 
-- **Demonstrates:** Pub/Sub Architecture, Thread-safe Data Gathering, Live Analytics.
-- **Description:** A simulation of a "Deep Space Analytics" tool. It uses the event bus to decouple the UI from the logic:
-   - **Publisher:** Buttons on the UI publish `PlanetaryScanEvent`s.
-   - **Subscriber:** A background worker listens for these events, simulates a randomized workload (variable sleep time), generates "scientific data" (distance/atmosphere density), and reports the results back.
-   - **Visualization:** The main thread safely locks the data mutex to render the incoming results on a scatter plot and a latency graph in real-time.
+> 📖 For detailed walkthroughs of each example, see the **[Examples Guide](https://github.com/EldritchCodex/Nodens/wiki/Examples-Guide)** on the wiki.
+
+##### Multithreaded Workload Profiling Showcase
+https://github.com/user-attachments/assets/4d345eb7-46c5-4360-a7f0-55466ec753ff
 
 
-# Applications Showcase
+# Other Applications Showcase
 
-Demonstrations of the Nodens framework in action, featuring real-time interactive simulations.
+Applications I used in my own research on numerical simulations using earlier versions of Nodens.
 
 https://github.com/user-attachments/assets/3025146c-d49b-4a10-84ea-3dcfa74ac59e
 
 https://github.com/user-attachments/assets/28be4bea-d0bd-46aa-bd1c-004daedd4243
 
 
+# Dependencies
+
+All dependencies are resolved automatically at configure time via CMake `FetchContent` and are downloaded and built from source (except from glad which is included in the `vendor` folder). 
+
+| Library                                             | Description                                               | Version            | 
+| :-------------------------------------------------- | :-------------------------------------------------------- | :----------------- | 
+| **[GLAD](https://glad.dav1d.de/)**                  | OpenGL function loader.                                   | v0.1.35            | 
+| **[GLFW](https://www.glfw.org/)**                   | Cross-platform for window, context, and input management. | 3.4                | 
+| **[ImGui](https://github.com/ocornut/imgui)**       | Bloat-free Immediate Mode GUI.                            | v1.92.9b-docking |
+| **[ImPlot](https://github.com/epezent/implot)**     | 2D data plotting extension for ImGui.                     | v1.0               | 
+| **[ImPlot3D](https://github.com/brenocq/implot3d)** | 3D data plotting extension for ImGui.                     | v0.4               | 
+| **[spdlog](https://github.com/gabime/spdlog)**      | Fast, header-only/compiled logging library.               | v1.17.0            | 
+| **[Tracy](https://github.com/wolfpld/tracy)**       | Real-time frame and GPU profiler.                         | v0.14.1 |
+
+# Acknowledgements
+
+A special thanks to **TheCherno**. The foundational architecture of Nodens was heavily inspired by the early episodes of his excellent [Game Engine series](http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) on YouTube.
+
+Additionally, Nodens originally began as a personal project for my undergraduate Computer Graphics course at UFMG. Early iterations of this framework powered several of my academic projects, including [boids](https://github.com/renanbomtempo/boids) and [galaxians](https://github.com/renanbomtempo/galaxians).
+
 # References
 
-### Dependencies
+- Gregory, J. (2019) *Game Engine Architecture*. Third edition. CRC Press.
+- Horton, I. and Van Weert, P. (2023) Beginning C++23: From Beginner to Pro. Berkeley, CA: Apress. Available at: https://doi.org/10.1007/978-1-4842-9343-0.
+- The Cherno (no date) Game Engine Series, YouTube. Available at: http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT.
 
-| Library                                             | Role / Domain      | Description                                               | Integration Method   | Version/Branch/Tag |
-| :-------------------------------------------------- | :----------------- | :-------------------------------------------------------- | :------------------- | :----------------- |
-| **[GLAD](https://glad.dav1d.de/)**                  | **Graphics Core**  | OpenGL function loader.                                   | Generated / External | 0.1.35             |
-| **[GLFW](https://www.glfw.org/)**                   | **System & Input** | Cross-platform for window, context, and input management. | **Git Submodule**    | 3.4                |
-| **[GLM](https://github.com/g-truc/glm)**            | **Mathematics**    | Header-only mathematics library.                          | **Git Submodule**    | 1.0.2              |
-| **[ImGui](https://github.com/ocornut/imgui)**       | **UI / Tools**     | Bloat-free Immediate Mode GUI.                            | **Git Submodule**    | v1.92.5-docking    |
-| **[ImPlot](https://github.com/epezent/implot)**     | **Visualization**  | 2D data plotting extension for ImGui.                     | **Git Submodule**    | master             |
-| **[ImPlot3D](https://github.com/brenocq/implot3d)** | **Visualization**  | 3D data plotting extension for ImGui.                     | **Git Submodule**    | main               |
-| **[SPDLog](https://github.com/gabime/spdlog)**      | **Utilities**      | Fast, header-only/compiled logging library.               | **Git Submodule**    | v1.16.0            |
-| **[Tracy](https://github.com/wolfpld/tracy)**       | **Profiling**      | Real-time frame profiler.                                 | **Git Submodule**    | v0.13.0            |
-
-### Literature
-
-[1] The Cherno (no date) Game Engine Series, YouTube. Available at: http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT.
-
-[2] Gregory, J. (2019) *Game Engine Architecture*. Third edition. CRC Press.
-
-[3] Horton, I. and Van Weert, P. (2023) Beginning C++23: From Beginner to Pro. Berkeley, CA: Apress. Available at: https://doi.org/10.1007/978-1-4842-9343-0.
-
-[4] Angel, E. and Shreiner, D. (2012) Interactive computer graphics: a top-down approach with shader-based OpenGL. 6th ed. Boston: Addison-Wesley.
+# License
+Copyright (c) 2026 EldritchCodex.
+This project and its entire history are licensed under the MIT License.

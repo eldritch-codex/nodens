@@ -15,9 +15,9 @@
 
 It unifies excellent third-party libraries (e.g. [ImGui](https://github.com/ocornut/imgui), [ImPlot](https://github.com/epezent/implot), [ImPlot3D](https://github.com/brenocq/implot3d), [Tracy](https://github.com/wolfpld/tracy)) with a custom core that integrates 4 main systems:
 - **GLFW Windows** with both OpenGL and Vulkan backends.
-- **Layer System** that governs the application lifetime and execution flow, visual rendering priority and input event routing (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Layer-System));
-- **Event System** with InputEvent routing through the LayerStack and a pub/sub thread-safe EventBus for both immediate and queued dispatch of custom event types (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Event-System));
-- **Job System** for multithreaded task execution (see [wiki](https://github.com/EldritchCodex/Nodens/wiki/Concurrency-and-JobSystem)).
+- **Layer System** that governs the application lifetime and execution flow, visual rendering priority and input event routing (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Layer-System));
+- **Event System** with InputEvent routing through the LayerStack and a pub/sub thread-safe EventBus for both immediate and queued dispatch of custom event types (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Event-System));
+- **Job System** for multithreaded task execution (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Concurrency-and-JobSystem)).
 
 Nodens follows a **module-first architecture** where public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`.
 
@@ -27,18 +27,18 @@ The framework compiles into a single **static library** that is linked to your a
 
 | Resource | Description |
 |----------|-------------|
-| **[Wiki](https://github.com/EldritchCodex/Nodens/wiki)** | Tutorials, architecture guides, and how-to articles |
+| **[Wiki](https://github.com/eldritch-codex/nodens/wiki)** | Tutorials, architecture guides, and how-to articles |
 | **API Reference** | Doxygen-generated class and function documentation - *not yet hosted; build locally with `cmake --build build --target nodens-docs`* |
 
 # Quick Start
 
-> 📖 For build, integration, and development-environment instructions, see the **[Getting Started](https://github.com/EldritchCodex/Nodens/wiki/Getting-Started)** wiki page.
+> 📖 For build, integration, and development-environment instructions, see the **[Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started)** wiki page.
 
 > ⚠️ **Platform limitation:** The supported and validated development environment is based on Arch Linux and currently builds Nodens for **Linux only**. Native Windows and macOS builds are not currently supported or validated.
 
-For new applications, start from the [Nodens Application Template](https://github.com/EldritchCodex/Template-NodensApp). Nodens can also be consumed from CMake with `FetchContent`; the wiki covers framework development, local checkouts, and native Linux builds.
+For new applications, start from the [Nodens Application Template](https://github.com/eldritch-codex/template-nodens-app). Nodens can also be consumed from CMake with `FetchContent`; the wiki covers framework development, local checkouts, and native Linux builds.
 
-Build configurations and their options are documented in the wiki, under [Building and Toolchain](https://github.com/EldritchCodex/Nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/EldritchCodex/Nodens/wiki/Profiling-with-Tracy).
+Build configurations and their options are documented in the wiki, under [Building and Toolchain](https://github.com/eldritch-codex/nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/eldritch-codex/nodens/wiki/Profiling-with-Tracy).
 
 ## Development Environment
 
@@ -50,7 +50,7 @@ NVIDIA hosts need the host NVIDIA driver and NVIDIA Container Toolkit before
 using the default GPU configuration. Intel/AMD hosts should select the
 alternative `/dev/dri` configuration in `.devcontainer/devcontainer.json`.
 
-See [Getting Started](https://github.com/EldritchCodex/Nodens/wiki/Getting-Started)
+See [Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started)
 for host setup, toolkit installation, GPU configuration, and build instructions.
 
 # Example Applications
@@ -62,7 +62,7 @@ Nodens includes several examples in the `examples/` directory:
 | **`circularwave3d`** | Immediate mode GUI, real-time 2D/3D plotting with ImPlot and ImPlot3D |
 | **`planetaryscan`** | Pub/Sub event bus, multi-threaded job system with thread-safe data collection, live scatter plot visualization |
 
-> 📖 For detailed walkthroughs of each example, see the **[Examples Guide](https://github.com/EldritchCodex/Nodens/wiki/Examples-Guide)** on the wiki.
+> 📖 For detailed walkthroughs of each example, see the **[Examples Guide](https://github.com/eldritch-codex/nodens/wiki/Examples-Guide)** on the wiki.
 
 ##### Multithreaded Workload Profiling Showcase
 https://github.com/user-attachments/assets/4d345eb7-46c5-4360-a7f0-55466ec753ff

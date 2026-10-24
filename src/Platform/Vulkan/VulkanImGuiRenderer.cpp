@@ -12,6 +12,8 @@ module;
 
 module Nodens.VulkanImGuiRenderer;
 
+import std;
+
 namespace Nodens
 {
 

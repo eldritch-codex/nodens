@@ -124,6 +124,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The job runs as root but the workspace belongs to the runner user, so git
+      # refuses to read it ("dubious ownership") until it is marked safe.
+      - name: Trust the workspace for git
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
       - name: Check the tag against the project version
         run: |
           set -euo pipefail
@@ -147,4 +152,5 @@ jobs:
       - name: Publish the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: gh release create "${GITHUB_REF_NAME}" "Nodens-${GITHUB_REF_NAME}.tar.gz" --title "Nodens ${GITHUB_REF_NAME#v}" --generate-notes

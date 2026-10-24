@@ -1,0 +1,150 @@
+name: CI
+
+# The build and release jobs run inside the project's own development image, so
+# CI uses the same compiler, CMake and clang-format as the dev container. The
+# image has no CC or CXX default and its plain c++ is GCC, which the project
+# does not build with, so every configure step names clang explicitly, as the
+# Zed tasks in .zed/tasks.json do.
+# Pull requests into main gate the trunk; a v* tag publishes a release from the
+# tagged commit.
+#
+# Requirements: the image must be publicly pullable, or the repository needs
+# package read access to it. JavaScript actions (checkout) need Node.js inside a
+# container job, so the first step installs it when the image lacks it.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ND_IMAGE: ghcr.io/eldritch-codex/arch-dev:main
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: List the C++ files this change touches
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            git fetch --no-tags origin "${GITHUB_BASE_REF}"
+            git diff --name-only --diff-filter=ACMR "origin/${GITHUB_BASE_REF}...HEAD"
+          elif git rev-parse --verify --quiet HEAD^ >/dev/null; then
+            git diff --name-only --diff-filter=ACMR HEAD^ HEAD
+          else
+            git diff-tree --no-commit-id --name-only -r --root HEAD
+          fi | grep -E '\.(cpp|cppm|h|hpp|hxx)$' | grep -v '^vendor/' > changed.txt || true
+          echo "Files to check:"
+          cat changed.txt
+
+      - name: clang-format, using the dev image binary
+        run: |
+          set -euo pipefail
+          if [ ! -s changed.txt ]; then
+            echo "No C++ files changed, nothing to format."
+            exit 0
+          fi
+          docker run --rm -v "$PWD:/work" -w /work "${ND_IMAGE}" \
+            sh -c 'xargs -r clang-format --dry-run -Werror < changed.txt'
+
+  build:
+    name: Build (${{ matrix.config }})
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eldritch-codex/arch-dev:main
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug, Release, Profiling]
+    steps:
+      - name: Ensure Node.js for JavaScript actions
+        run: |
+          set -euo pipefail
+          command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
+
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Assert that the Vulkan backend was compiled in
+        run: |
+          set -euo pipefail
+          if ! grep -q -- '-DND_HAS_VULKAN' build/compile_commands.json; then
+            echo "::error::ND_HAS_VULKAN is missing from the compile database, so the Vulkan SDK was not found and this build would be OpenGL only."
+            exit 1
+          fi
+          echo "Vulkan backend compiled in."
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        if: ${{ hashFiles('tests/CMakeLists.txt') != '' }}
+        run: ctest --test-dir build --output-on-failure
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/eldritch-codex/arch-dev:main
+      options: --user root
+    permissions:
+      contents: write
+    steps:
+      - name: Ensure Node.js and the GitHub CLI
+        run: |
+          set -euo pipefail
+          command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
+          command -v gh >/dev/null 2>&1 || pacman -Sy --noconfirm --needed github-cli
+
+      - name: Check out the tagged commit
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag against the project version
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(grep -oE 'project\(Nodens VERSION [0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | awk '{print $3}')"
+          if [ "${tag}" != "${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match the project version ${version} in CMakeLists.txt."
+            exit 1
+          fi
+          echo "Tag ${GITHUB_REF_NAME} matches project version ${version}."
+
+      - name: Build the tag
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake --build build --parallel
+
+      - name: Archive the source
+        run: git archive --format=tar.gz --prefix="Nodens-${GITHUB_REF_NAME}/" -o "Nodens-${GITHUB_REF_NAME}.tar.gz" "${GITHUB_REF_NAME}"
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${GITHUB_REF_NAME}" "Nodens-${GITHUB_REF_NAME}.tar.gz" --title "Nodens ${GITHUB_REF_NAME#v}" --generate-notes

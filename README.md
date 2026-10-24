@@ -1,7 +1,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT) 
 ![Supported platforms: Linux ](https://img.shields.io/badge/Supported%20platforms-Linux-blue.svg?style=flat-square)
 
-> ⚠️ **Development Status:** Nodens is currently in **active, experimental development** with no stable release. It serves primarily as a learning ground and playground for exploring game engine architecture and modern C++20/23 features. APIs are highly subject to change.
+> ⚠️ **Development Status:** Nodens **0.1.0** is the first tagged release, and the framework remains in **active, experimental development**. It serves primarily as a learning ground and playground for exploring game engine architecture and modern C++20/23 features. While the major version is 0, APIs are highly subject to change and a breaking change bumps the minor version.
+>
+> **Known limitations in 0.1.0:**
+> - Linux only: the validated environment is Arch Linux, and native Windows and macOS builds are not supported.
+> - The Vulkan backend covers window, swapchain, frame synchronization and ImGui rendering. Nodens exposes no renderer API of its own, since renderers such as Nyar borrow the Vulkan context.
+> - A release is the tagged source plus generated notes: there are no install rules, binary packages or hosted API documentation yet.
+> - The test suite is not in place yet, so CI gates on a successful build, the Vulkan backend assertion and formatting.
 
 # Introduction
 

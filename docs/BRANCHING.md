@@ -102,7 +102,7 @@ The fix lands on `main` first and is tagged there. When a `release/<version>` br
 
 | Event | Jobs | What it proves |
 |---|---|---|
-| Pull request into `main` | `format`, `build` for Debug and Release | the change compiles in both configurations, keeps the Vulkan backend, and is formatted |
+| Pull request into `main` | `format`, `build` for Debug, Release and Profiling | the change compiles in all three configurations, keeps the Vulkan backend, and is formatted |
 | Push to `main` | `format`, `build` | the trunk stays releasable |
 | Tag `v*` | `build`, `release` | the tagged commit builds and the release is published from it |
 

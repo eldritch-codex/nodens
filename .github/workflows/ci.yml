@@ -1,7 +1,10 @@
 name: CI
 
 # The build and release jobs run inside the project's own development image, so
-# CI uses the same compiler, CMake and clang-format as the dev container.
+# CI uses the same compiler, CMake and clang-format as the dev container. The
+# image has no CC or CXX default and its plain c++ is GCC, which the project
+# does not build with, so every configure step names clang explicitly, as the
+# Zed tasks in .zed/tasks.json do.
 # Pull requests into main gate the trunk; a v* tag publishes a release from the
 # tagged commit.
 #
@@ -33,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -47,7 +50,7 @@ jobs:
             git diff --name-only --diff-filter=ACMR HEAD^ HEAD
           else
             git diff-tree --no-commit-id --name-only -r --root HEAD
-          fi | grep -E '\.(cpp|cppm|h|hpp|hxx)$' > changed.txt || true
+          fi | grep -E '\.(cpp|cppm|h|hpp|hxx)$' | grep -v '^vendor/' > changed.txt || true
           echo "Files to check:"
           cat changed.txt
 
@@ -70,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [Debug, Release]
+        config: [Debug, Release, Profiling]
     steps:
       - name: Ensure Node.js for JavaScript actions
         run: |
@@ -78,10 +81,10 @@ jobs:
           command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
 
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Assert that the Vulkan backend was compiled in
         run: |
@@ -117,7 +120,7 @@ jobs:
           command -v gh >/dev/null 2>&1 || pacman -Sy --noconfirm --needed github-cli
 
       - name: Check out the tagged commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -135,7 +138,7 @@ jobs:
       - name: Build the tag
         run: |
           set -euo pipefail
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           cmake --build build --parallel
 
       - name: Archive the source

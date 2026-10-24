@@ -16,7 +16,7 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 - Dear ImGui integration with ImPlot and ImPlot3D, a renderer abstraction per backend, and a default theme.
 - Tracy CPU and GPU profiling behind a dedicated `Profiling` build configuration.
 - Example applications: `circularwave3d` and `planetaryscan`.
-- GitHub Actions CI: Debug and Release builds in the development image, a Vulkan backend assertion, formatting checks on changed files, and a tag-triggered release.
+- GitHub Actions CI: Debug, Release and Profiling builds with clang in the development image, a Vulkan backend assertion, formatting checks on changed files, and a tag-triggered release.
 - Branching and release policy in `docs/BRANCHING.md`.
 
 ### Changed

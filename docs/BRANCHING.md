@@ -1,6 +1,7 @@
+<!-- covers: CMakeLists.txt, .devcontainer/devcontainer.json, .github/workflows/ -->
 # Branching and releases
 
-Nodens keeps one trunk. Every change integrates into `main` continuously, and a release is an annotated tag on `main` followed by a CI job that publishes it. A single shared main branch, rather than long-lived branches merged into a release line infrequently, is what trunk-based development means [^1].
+Nodens keeps one trunk. Every change integrates into `main` continuously, and a release is an annotated tag on `main` followed by a CI job that publishes it. A single shared main branch, rather than long-lived branches merged into a release line infrequently, is what trunk-based development means.[^orosz]
 
 ## Branch roles
 
@@ -15,12 +16,12 @@ Nodens keeps one trunk. Every change integrates into `main` continuously, and a 
 
 ## Rules
 
-1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI [^2].
+1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI.[^orosz-ci]
 2. Every change enters `main` through a pull request and lands as one squashed commit, so the trunk reads one commit per change.
 3. A merge that forms a release uses `--no-ff`, so the release boundary stays visible in history.
 4. Tags are annotated, named `vMAJOR.MINOR.PATCH`, and created on `main` only.
 5. While the major version is 0, a breaking change bumps the minor version: 0.1.0 becomes 0.2.0, never 0.1.1.
-6. The tag name and the CMake project version must agree, because the release job refuses to publish when they do not [^4].
+6. The tag name and the CMake project version must agree, because the release job refuses to publish when they do not (the version is declared in `CMakeLists.txt`).
 
 ## The flow
 
@@ -106,11 +107,11 @@ The fix lands on `main` first and is tagged there. When a `release/<version>` br
 | Push to `main` | `format`, `build` | the trunk stays releasable |
 | Tag `v*` | `build`, `release` | the tagged commit builds and the release is published from it |
 
-The jobs run inside the project's own development image, so CI uses the same compiler and CMake as the dev container [^5]. They also assert that the Vulkan backend was compiled in, because a missing Vulkan SDK would otherwise reduce the build to OpenGL without anyone noticing [^6].
+The jobs run inside the project's own development image, so CI uses the same compiler and CMake as the dev container (the image is named in `.devcontainer/devcontainer.json`). They also assert that the Vulkan backend was compiled in, because a missing Vulkan SDK would otherwise reduce the build to OpenGL without anyone noticing (`CMakeLists.txt` looks for Vulkan with `find_package(Vulkan QUIET)`, so a missing SDK is not an error).
 
 ## Why this model
 
-Continuous integration means integrating back to the main branch frequently, through pull requests that each run a build, so a broken change is caught within minutes instead of at release time [^2]. In a trunk-based setup that automation is not optional: it is what keeps the trunk healthy enough for everyone to build from it [^3]. The cost is paid up front, in build tooling and pipeline time, which is what the ladder below spreads out.
+Continuous integration means integrating back to the main branch frequently, through pull requests that each run a build, so a broken change is caught within minutes instead of at release time. In a trunk-based setup that automation is not optional: it is what keeps the trunk healthy enough for everyone to build from it.[^orosz-health] The cost is paid up front, in build tooling and pipeline time, which is what the ladder below spreads out.
 
 ## Learning ladder
 
@@ -125,20 +126,12 @@ Continuous integration means integrating back to the main branch frequently, thr
 - A branch that lives for weeks is deferred integration, not a strategy. Either give it a version number and call it a release branch, or split it.
 - Tagging from a hotfix branch instead of `main` leaves the fix out of the trunk.
 - Editing `CHANGELOG.md` after the tag produces notes that describe a tree that no longer exists.
-- Moving the version in `CMakeLists.txt` without tagging, or tagging without moving it, trips the release job on purpose [^4].
+- Moving the version in `CMakeLists.txt` without tagging, or tagging without moving it, trips the release job on purpose.
 
-## Sources
+## References
 
----
+[^orosz]: Gergely Orosz, *The Software Engineer's Guidebook: Navigating Senior, Tech Lead, and Staff Engineer Positions at Tech Companies and Startups*, 1st ed. (Amsterdam: The Pragmatic Engineer, 2023), p. 329.
 
-[^1]: The Software Engineer's Guidebook, p. 329, zotero://open-pdf/library/items/A2HEUNEZ?page=342. Trunk-based development is a single shared main branch, described as the opposite of working in a long-lived branch and merging to a release branch infrequently.
+[^orosz-ci]: Orosz, *The Software Engineer's Guidebook*, p. 328.
 
-[^2]: The Software Engineer's Guidebook, p. 328, zotero://open-pdf/library/items/A2HEUNEZ?page=341. Continuous integration integrates back to the main branch through pull requests, each of which runs a build with static analysis, tests and further automation, so regressions are caught sooner.
-
-[^3]: The Software Engineer's Guidebook, p. 330, zotero://open-pdf/library/items/A2HEUNEZ?page=343. It is necessary to set up CI for trunk-based development to ensure the main branch is healthy, and the trade-off is more investment in build tooling.
-
-[^4]: nodens/CMakeLists.txt:3 declares the project version that the release job compares with the tag name.
-
-[^5]: nodens/.devcontainer/devcontainer.json:3 names the image the CI jobs run in, ghcr.io/eldritch-codex/arch-dev:main.
-
-[^6]: nodens/CMakeLists.txt:66 looks for Vulkan with find_package(Vulkan QUIET), so a missing SDK yields an OpenGL-only build unless CI asserts otherwise.
+[^orosz-health]: Orosz, *The Software Engineer's Guidebook*, p. 330.

@@ -1,4 +1,4 @@
-<!-- covers: CMakeLists.txt, .devcontainer/devcontainer.json, .github/workflows/ -->
+<!-- covers: CMakeLists.txt, .devcontainer/, .github/workflows/ -->
 # Branching and releases
 
 Nodens keeps one trunk. Every change integrates into `main` continuously, and a release is an annotated tag on `main` followed by a CI job that publishes it. A single shared main branch, rather than long-lived branches merged into a release line infrequently, is what trunk-based development means.[^orosz]
@@ -16,7 +16,7 @@ Nodens keeps one trunk. Every change integrates into `main` continuously, and a 
 
 ## Rules
 
-1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI.[^orosz-ci]
+1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI.[^orosz-health]
 2. Every change enters `main` through a pull request and lands as one squashed commit, so the trunk reads one commit per change.
 3. A merge that forms a release uses `--no-ff`, so the release boundary stays visible in history.
 4. Tags are annotated, named `vMAJOR.MINOR.PATCH`, and created on `main` only.
@@ -107,11 +107,11 @@ The fix lands on `main` first and is tagged there. When a `release/<version>` br
 | Push to `main` | `format`, `build` | the trunk stays releasable |
 | Tag `v*` | `build`, `release` | the tagged commit builds and the release is published from it |
 
-The jobs run inside the project's own development image, so CI uses the same compiler and CMake as the dev container (the image is named in `.devcontainer/devcontainer.json`). They also assert that the Vulkan backend was compiled in, because a missing Vulkan SDK would otherwise reduce the build to OpenGL without anyone noticing (`CMakeLists.txt` looks for Vulkan with `find_package(Vulkan QUIET)`, so a missing SDK is not an error).
+The jobs run inside the project's own development image, so CI uses the same compiler and CMake as the dev container (the image is named in each config under `.devcontainer/`). They also assert that the Vulkan backend was compiled in, because a missing Vulkan SDK would otherwise reduce the build to OpenGL without anyone noticing (`CMakeLists.txt` looks for Vulkan with `find_package(Vulkan QUIET)`, so a missing SDK is not an error).
 
 ## Why this model
 
-Continuous integration means integrating back to the main branch frequently, through pull requests that each run a build, so a broken change is caught within minutes instead of at release time. In a trunk-based setup that automation is not optional: it is what keeps the trunk healthy enough for everyone to build from it.[^orosz-health] The cost is paid up front, in build tooling and pipeline time, which is what the ladder below spreads out.
+Continuous integration means integrating back to the main branch frequently, through pull requests that each run a build, so a broken change is caught within minutes instead of at release time.[^orosz-ci] In a trunk-based setup that automation is not optional: it is what keeps the trunk healthy enough for everyone to build from it.[^orosz-health] The cost is paid up front, in build tooling and pipeline time, which is what the ladder below spreads out.
 
 ## Learning ladder
 
@@ -130,7 +130,7 @@ Continuous integration means integrating back to the main branch frequently, thr
 
 ## References
 
-[^orosz]: Gergely Orosz, *The Software Engineer's Guidebook: Navigating Senior, Tech Lead, and Staff Engineer Positions at Tech Companies and Startups*, 1st ed. (Amsterdam: The Pragmatic Engineer, 2023), p. 329.
+[^orosz]: Gergely Orosz, *The Software Engineer's Guidebook: Navigating Senior, Tech Lead, and Staff Engineer Positions at Tech Companies and Startups*, First edition (Amsterdam, Netherlands: The Pragmatic Engineer, 2023), p. 329.
 
 [^orosz-ci]: Orosz, *The Software Engineer's Guidebook*, p. 328.
 

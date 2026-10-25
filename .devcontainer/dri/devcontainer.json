@@ -1,0 +1,21 @@
+{
+  "name": "EldritchCodex Nodens Dev Environment (Intel/AMD)",
+  "image": "ghcr.io/eldritch-codex/arch-dev:main",
+  "runArgs": ["--device=/dev/dri", "--group-add=video", "--group-add=render", "--name=eldritch-codex-nodens-dri"],
+  "remoteUser": "eldritchcodex",
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
+    "source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR},type=bind"
+  ],
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+    "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}"
+  },
+  "postCreateCommand": "cmake -S . -B build",
+  "customizations": {
+    "zed": {
+      "extensions": ["slang"]
+    }
+  }
+}

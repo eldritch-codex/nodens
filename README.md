@@ -97,6 +97,12 @@ A special thanks to **TheCherno**. The foundational architecture of Nodens was h
 
 Additionally, Nodens originally began as a personal project for my undergraduate Computer Graphics course at UFMG. Early iterations of this framework powered several of my academic projects, including [boids](https://github.com/renanbomtempo/boids) and [galaxians](https://github.com/renanbomtempo/galaxians).
 
+# AI assistance
+
+The architecture and the code of Nodens are written by the maintainer. Coding agents, Claude Code and the maintainer's own agent, Armitage, help with writing documentation and with understanding CI/CD tooling.
+
+Commits carry no co-author or AI attribution trailers, because the maintainer is responsible for every commit. This section is where the use of agents is disclosed.
+
 # References
 
 - Gregory, J. (2019) *Game Engine Architecture*. Third edition. CRC Press.

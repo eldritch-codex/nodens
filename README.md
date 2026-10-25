@@ -46,9 +46,9 @@ Nodens includes a Linux Dev Container using
 `ghcr.io/eldritch-codex/arch-dev:main`. Open the repository in Zed or
 Visual Studio Code, then reopen it in the Dev Container.
 
-NVIDIA hosts need the host NVIDIA driver and NVIDIA Container Toolkit before
-using the default GPU configuration. Intel/AMD hosts should select the
-alternative `/dev/dri` configuration in `.devcontainer/devcontainer.json`.
+When your editor asks which configuration to open, choose `nvidia` or `dri`
+(Intel/AMD). NVIDIA hosts need the host NVIDIA driver and NVIDIA Container
+Toolkit first.
 
 See [Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started)
 for host setup, toolkit installation, GPU configuration, and build instructions.

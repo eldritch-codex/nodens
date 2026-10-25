@@ -1,0 +1,22 @@
+{
+  "name": "EldritchCodex Nodens Dev Environment (NVIDIA)",
+  "image": "ghcr.io/eldritch-codex/arch-dev:main",
+  "runArgs": ["--gpus=all", "--name=eldritch-codex-nodens-nvidia"],
+  "remoteUser": "eldritchcodex",
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
+    "source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR},type=bind"
+  ],
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+    "XDG_RUNTIME_DIR": "${localEnv:XDG_RUNTIME_DIR}",
+    "NVIDIA_DRIVER_CAPABILITIES": "graphics,display,utility"
+  },
+  "postCreateCommand": "cmake -S . -B build",
+  "customizations": {
+    "zed": {
+      "extensions": ["slang"]
+    }
+  }
+}

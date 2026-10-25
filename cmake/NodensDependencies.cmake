@@ -1,13 +1,13 @@
 # =============================================================================
 # NodensDependencies.cmake - Centralized dependency declarations for Nodens
 # =============================================================================
-# Uses FetchContent with FIND_PACKAGE_ARGS where possible so that:
-#   1. System-installed packages are preferred (via find_package).
-#   2. If not found, source is downloaded and built automatically.
+# Every dependency comes from FetchContent: each declaration pins a GIT_TAG
+# and the source is downloaded and built at configure time. No declaration
+# passes FIND_PACKAGE_ARGS, so a system-installed copy is never used. Add
+# FIND_PACKAGE_ARGS to a declaration if that should change.
 #
-# Libraries WITHOUT official CMake packaging (ImGui, ImPlot, ImPlot3d)
-# are always fetched from source. Their build targets are created
-# separately in NodensImGui.cmake.
+# The ImGui libraries have no CMake build upstream. They are fetched here and
+# their build targets are created separately in NodensImGui.cmake.
 # =============================================================================
 
 include(FetchContent)
@@ -72,8 +72,8 @@ FetchContent_Declare(implot3d
 )
 
 # ─── Populate all dependencies ──────────────────────────────────────────────
-# spdlog, glfw, tracy: find_package attempted first, fallback to source.
-# imgui, implot, implot3d: always downloaded (no CMake packaging upstream).
+# All five are fetched from the pinned tags above.
+# imgui, implot, implot3d: their targets are created in NodensImGui.cmake.
 FetchContent_MakeAvailable(spdlog tracy imgui implot implot3d)
 
 # Enable Tracy instrumentation only for the `Profiling` build config.

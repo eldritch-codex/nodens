@@ -64,6 +64,11 @@ endif()
 
 if(ND_ENABLE_VULKAN)
   find_package(Vulkan QUIET)
+  if(NOT Vulkan_FOUND)
+    message(WARNING "ND_ENABLE_VULKAN is ON but the Vulkan SDK was not found, so Nodens is built without the Vulkan backend. "
+                    "Applications that use the default GraphicsAPI (Vulkan) will exit at startup. "
+                    "Install the Vulkan development files, or set -DND_ENABLE_VULKAN=OFF and use OpenGL.")
+  endif()
 endif()
 include(NodensImGui)
 

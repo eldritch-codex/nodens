@@ -25,20 +25,19 @@ CircularWave3DLayer::CircularWave3DLayer() : ILayer("CircularWave3D")
     }
 } // CircularWave3DLayer::CircularWave3DLayer
 
-void CircularWave3DLayer::OnUpdate(Nodens::TimeStep previous_update_duration)
+void CircularWave3DLayer::OnUpdate(Nodens::TimeStep ts)
 {
     ZoneScoped;
 
-    constexpr float kIncrement{0.001f};
+    // Advance by time, not by frame, so the curve scrolls at the same speed at any frame rate.
+    constexpr float kSpeed{0.06f}; // curve units per second
+    const float increment = kSpeed * ts;
     for (int i = 0; i < kNumberOfPoints; i++)
     {
-        t[i] += kIncrement;
+        t[i] += increment;
         xs[i] = std::sin(m_Frequency * t[i]);
         ys[i] = std::cos(m_Frequency * t[i]);
     }
-
-    // Nodens::ClientLogger().info("Updated CircularWave3DLayer with timestep: {:.3f} ms",
-    //                             previous_update_duration.GetMilliseconds());
 } // CircularWave3DLayer::OnUpdate
 
 void CircularWave3DLayer::OnImGuiRender(Nodens::TimeStep ts)

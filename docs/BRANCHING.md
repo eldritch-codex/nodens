@@ -17,7 +17,7 @@ Nodens keeps one trunk. Every change integrates into `main` continuously, and a 
 ## Rules
 
 1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI.[^orosz-health]
-2. Every change enters `main` through a pull request and lands as one squashed commit, so the trunk reads one commit per change.
+2. Every change enters `main` through a pull request and lands as one squashed commit, so the trunk reads one commit per change. Commit and pull request title conventions are in [Committing](COMMITTING.md).
 3. A merge that forms a release uses `--no-ff`, so the release boundary stays visible in history.
 4. Tags are annotated, named `vMAJOR.MINOR.PATCH`, and created on `main` only.
 5. While the major version is 0, a breaking change bumps the minor version: 0.1.0 becomes 0.2.0, never 0.1.1.

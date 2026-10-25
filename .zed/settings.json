@@ -1,0 +1,13 @@
+{
+  "lsp": {
+    "clangd": {
+      "binary": {
+        "arguments": [
+          "--experimental-modules-support",
+          "--compile-commands-dir=build",
+          "--header-insertion=never"
+        ]
+      }
+    }
+  }
+}

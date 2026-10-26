@@ -106,7 +106,8 @@ public:
 private:
     /// @brief Handles the WindowCloseEvent by setting the running flag to false.
     /// @param e The window close event.
-    /// @return Always returns true (event is consumed).
+    /// @return Always false: the close event is deliberately not consumed, so every layer below
+    ///         still receives it.
     bool OnWindowClose(InputEvents::WindowClose& e);
 
     FApplicationSpecification m_Specification; ///< Stored copy of the startup configuration.

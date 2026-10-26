@@ -2,9 +2,9 @@ name: CI
 
 # The build and release jobs run inside the project's own development image, so
 # CI uses the same compiler, CMake and clang-format as the dev container. The
-# image has no CC or CXX default and its plain c++ is GCC, which the project
-# does not build with, so every configure step names clang explicitly, as the
-# Zed tasks in .zed/tasks.json do.
+# image already defaults to Clang and Ninja, but every configure step names
+# clang explicitly, so the compiler under test is stated here and does not
+# change if the image default does.
 # Pull requests into main gate the trunk; a v* tag publishes a release from the
 # tagged commit.
 #

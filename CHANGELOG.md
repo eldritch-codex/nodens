@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Fixed
+
+- GLFW is fetched at its pinned tag. It was declared but never made available, so the build linked the system copy.
+
 ## [0.1.0] - 2026-10-24
 
 ### Added

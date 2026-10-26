@@ -1,7 +1,7 @@
 <!-- covers: cmake/, vendor/glad/, README.md -->
 # Dependencies
 
-Every third-party library is declared in `cmake/NodensDependencies.cmake` and pinned with `GIT_TAG`. No declaration sets `FIND_PACKAGE_ARGS`, so a system-installed copy is never consulted: all five libraries are fetched at configure time.
+Every third-party library is declared in `cmake/NodensDependencies.cmake` and pinned with `GIT_TAG`. No declaration sets `FIND_PACKAGE_ARGS`, so a system-installed copy is never consulted: all six libraries are fetched at configure time.
 
 ## The ImGui stack
 

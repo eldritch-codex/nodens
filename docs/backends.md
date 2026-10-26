@@ -23,4 +23,4 @@ Nodens puts its graphics API behind two interfaces: `IGraphicsContext` (`src/Nod
 
 `ND_ENABLE_OPENGL` and `ND_ENABLE_VULKAN` in `CMakeLists.txt` decide which backends are built; Vulkan is built only when it is available. They define `ND_HAS_OPENGL` and `ND_HAS_VULKAN` for the `Nodens` target, and those definitions are what the code tests when it selects a renderer.
 
-CI fails when `-DND_HAS_VULKAN` is missing from `compile_commands.json`, so an absent Vulkan SDK cannot silently reduce the build to OpenGL.
+When `ND_ENABLE_VULKAN` is on and the Vulkan SDK is missing, CMake prints a configure warning that the build has no Vulkan backend and that applications using the default `GraphicsAPI` will exit at startup. CI turns that case into a failure: it checks that `-DND_HAS_VULKAN` is in `compile_commands.json`, so the build cannot silently become OpenGL only.

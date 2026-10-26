@@ -72,9 +72,9 @@ FetchContent_Declare(implot3d
 )
 
 # ─── Populate all dependencies ──────────────────────────────────────────────
-# All five are fetched from the pinned tags above.
+# All six are fetched from the pinned tags above.
 # imgui, implot, implot3d: their targets are created in NodensImGui.cmake.
-FetchContent_MakeAvailable(spdlog tracy imgui implot implot3d)
+FetchContent_MakeAvailable(spdlog glfw tracy imgui implot implot3d)
 
 # Enable Tracy instrumentation only for the `Profiling` build config.
 # Set to PUBLIC so TracyClient.cpp itself and every consumer (Nodens, examples)

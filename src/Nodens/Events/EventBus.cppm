@@ -63,7 +63,10 @@ public:
         const auto typeErasedWrapper = [h = std::forward<THandler>(handler)](void* data)
         { h(*static_cast<TEvent*>(data)); };
 
-        m_Subscribers[typeId].emplace_back(subscriptionId, std::move(typeErasedWrapper));
+        {
+            std::lock_guard lock(m_RegistryMutex);
+            m_Subscribers[typeId].emplace_back(subscriptionId, std::move(typeErasedWrapper));
+        }
 
         CoreLogger().info("EventBus: New subscription (id={}) to Event '{}' (typeId={})",
                           subscriptionId,
@@ -111,10 +114,7 @@ public:
         activeBuffer.resize(offset + dataSize);
         std::memcpy(activeBuffer.data() + offset, &event, dataSize);
 
-        CoreLogger().trace("EventBus: Queued '{}' ({} bytes) [{} subscribers]",
-                           TEvent::Name,
-                           dataSize,
-                           m_Subscribers[typeId].size());
+        CoreLogger().trace("EventBus: Queued '{}' ({} bytes)", TEvent::Name, dataSize);
     }
 
     /// @brief Check if an event type is registered.

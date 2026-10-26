@@ -9,6 +9,7 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 - GLFW is fetched at its pinned tag. It was declared but never made available, so the build linked the system copy.
 - `ND_BUILD_EXAMPLES` defaults to off when Nodens is consumed by another project. The default was on, because the second `option()` call was a no-op.
 - The `MouseButtonReleased` event has a name. It was empty, so the event logged as an empty string and the file failed to compile with GCC.
+- `EventBus::Subscribe` takes the registry lock, and `QueueEvent` no longer reads the subscriber list unlocked for its trace line, so subscribing or queueing a new event type from another thread no longer races on that list.
 
 ## [0.1.0] - 2026-10-24
 

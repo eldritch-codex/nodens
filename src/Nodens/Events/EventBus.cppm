@@ -94,7 +94,8 @@ public:
 
     /// @brief Queues an event for deferred dispatch during the next Flush() call.
     /// @param event The event value to queue. Copied into a contiguous byte buffer.
-    /// @details This call returns immediately. The event is stored in a pre-allocated write buffer.
+    /// @details This call returns immediately. The event's bytes are appended to the per-type write
+    /// buffer, which grows as events are queued.
     /// During Flush(), the buffers are swapped and queued events are dispatched synchronously.
     /// @note Thread-safe. May be called from any thread.
     template <Event TEvent>
@@ -158,7 +159,8 @@ private:
     /// @details All events are registered to a multicast dispatcher lambda that is responsible for
     /// 1. rebuilding the event data from the byte array stored in the buffer,
     /// 2. calling `DispatchToSubscribers()` for that event.
-    /// @note Caller must hold m_RegistryMutex.
+    /// @note Takes m_BufferMutex and m_RegistryMutex itself, one after the other; the caller must
+    /// hold neither.
     template <Event TEvent>
     void RegisterEventType()
     {
@@ -197,9 +199,6 @@ private:
     }
 
 private:
-    /// @brief Default capacity for each async buffer (64 KB).
-    static constexpr std::size_t kDefaultBufferCapacity{64 * 1024};
-
     /// @brief Monotonically increasing subscription ID counter.
     std::atomic<SubscriptionID> m_NextId{};
 

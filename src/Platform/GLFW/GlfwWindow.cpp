@@ -30,17 +30,17 @@ namespace Nodens
 ///          struct that stores dimensions, VSync state, and the event callback. GLFW callbacks are
 ///          registered during Init() and dispatch Nodens Event objects to the application.
 /// @ingroup Platform
-class GLFWWindow : public IWindow
+class GlfwWindow : public IWindow
 {
 public:
     /// @brief Constructs and initializes a GLFW window with the given properties.
     /// @param props Window configuration (title, dimensions, VSync).
-    GLFWWindow(const FWindowProps& props)
+    GlfwWindow(const FWindowProps& props)
     {
         Init(props);
     }
 
-    ~GLFWWindow() override
+    ~GlfwWindow() override
     {
         Shutdown();
     }
@@ -147,15 +147,15 @@ static void GLFWErrorCallback(int error, const char* description)
 
 /// @brief Factory implementation: creates a GlfwWindow.
 /// @param props Window configuration.
-/// @return A new GLFWWindow (caller takes ownership).
+/// @return A new GlfwWindow (caller takes ownership).
 IWindow* IWindow::Create(const FWindowProps& props)
 {
-    return new GLFWWindow(props);
+    return new GlfwWindow(props);
 }
 
 /// @brief Initializes GLFW, creates the window, optionally sets up OpenGL, and registers
 ///        all GLFW event callbacks (resize, close, key, mouse button, scroll, cursor).
-void GLFWWindow::Init(const FWindowProps& props)
+void GlfwWindow::Init(const FWindowProps& props)
 {
     ZoneScoped;
 
@@ -321,7 +321,7 @@ void GLFWWindow::Init(const FWindowProps& props)
 }
 
 /// @brief Destroys the underlying GLFW window.
-void GLFWWindow::Shutdown()
+void GlfwWindow::Shutdown()
 {
     delete m_Context;
     m_Context = nullptr;

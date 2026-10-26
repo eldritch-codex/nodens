@@ -79,7 +79,7 @@ static_assert(Event<InputEvents::MouseButtonPressed>);
 /// @ingroup InputEvents
 struct MouseButtonReleased
 {
-    static constexpr std::string_view Name;
+    static constexpr std::string_view Name = "MouseButtonReleased";
     int Button; ///< The mouse button code.
 };
 static_assert(Event<InputEvents::MouseButtonReleased>);

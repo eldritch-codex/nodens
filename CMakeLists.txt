@@ -28,14 +28,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Developer Options (primary touchpoints)
 option(ND_ENABLE_OPENGL "Build the OpenGL backend" ON)
 option(ND_ENABLE_VULKAN "Build the Vulkan backend when Vulkan is available" ON)
-option(ND_BUILD_EXAMPLES
-  "Build the Nodens example applications" ON)
-option(ND_BUILD_TRACY_PROFILER
-  "Build the Tracy Profiler GUI from Tracy source" OFF)
-
-if(NOT PROJECT_IS_TOP_LEVEL)
+# The examples are on in Nodens' own build and off when another project consumes it. The default
+# is chosen before the one option() call: a second call for the same name would be a no-op.
+if(PROJECT_IS_TOP_LEVEL)
+  option(ND_BUILD_EXAMPLES "Build the Nodens example applications" ON)
+else()
   option(ND_BUILD_EXAMPLES "Build the Nodens example applications" OFF)
 endif()
+option(ND_BUILD_TRACY_PROFILER
+  "Build the Tracy Profiler GUI from Tracy source" OFF)
 
 # -----------------------------------------------------------------------------
 # Dependencies

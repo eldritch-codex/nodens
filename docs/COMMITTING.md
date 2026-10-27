@@ -18,29 +18,29 @@ Optional body: why, when the code does not show it.
 
 ## Types
 
-| Type | Use it for | Example from this repo |
-|---|---|---|
-| `feat` | new behavior a user of Nodens can see | `feat(vulkan): default graphics API to Vulkan` |
-| `fix` | behavior that was wrong | `fix(cmake): warn when the Vulkan SDK is not found` |
-| `refactor` | restructuring code with no change in behavior | `refactor(vulkan): split context module implementation` |
-| `docs` | documentation only | `docs(branching): cite the verified Orosz pages and the devcontainer folder` |
-| `build` | the build system, dependencies, packaging and the development environment | `build(devcontainer): one config per GPU type` |
-| `ci` | the CI workflows | `ci: trust the workspace for git in the release job` |
-| `style` | formatting only, no meaning change | `style: Enforce a single consecutive empty line` |
-| `chore` | upkeep that fits nowhere above | `chore: ignore CMake system information files` |
+| Type | Use it for | Route | Example from this repo |
+|---|---|---|---|
+| `feat` | new behavior a user of Nodens can see | pull request | `feat(vulkan): default graphics API to Vulkan` |
+| `fix` | behavior that was wrong | pull request | `fix(cmake): warn when the Vulkan SDK is not found` |
+| `refactor` | restructuring code with no change in behavior | pull request | `refactor(vulkan): split context module implementation` |
+| `docs` | documentation only | direct | `docs(branching): cite the verified Orosz pages and the devcontainer folder` |
+| `build` | the build system, dependencies, packaging and the development environment | direct for tooling and the dev environment; pull request for `CMakeLists.txt`, `cmake/` and dependency versions | `build(devcontainer): one config per GPU type` |
+| `ci` | the CI workflows | pull request | `ci: trust the workspace for git in the release job` |
+| `style` | formatting only, no meaning change | direct | `style: Enforce a single consecutive empty line` |
+| `chore` | upkeep that fits nowhere above | direct | `chore: ignore CMake system information files` |
 
-When two types fit, pick the one a reader of the changelog would look under. A change that fixes behavior and refactors around it is a `fix`.
+When two types fit, pick the one a reader of the changelog would look under. A change that fixes behavior and refactors around it is a `fix`. The route follows the type; [Which route](BRANCHING.md#which-route) explains it.
 
 ## One commit, one thing
 
 - A commit does one thing and its subject names it. If the subject needs "and", it is two commits.
 - Stage explicit paths (`git add path/to/file`), not `git add -A`, and read `git diff --staged` first.
-- Unrelated changes go on separate branches and pull requests, not into one.
+- Unrelated changes go in separate commits, and a pull request holds one change.
 - Every commit on `main` builds.
 
 ## Pull request titles
 
-Pull requests are squash-merged, so the **PR title becomes the commit on `main`**. Write it in the same format as a commit subject, and check it before merging: GitHub appends the PR number, as in `fix(cmake): warn when the Vulkan SDK is not found (#40)`.
+Only the pull request route has a PR title. Pull requests are squash-merged, so the **PR title becomes the commit on `main`**. Write it in the same format as a commit subject, and check it before merging: GitHub appends the PR number, as in `fix(cmake): warn when the Vulkan SDK is not found (#40)`.
 
 ## The changelog
 

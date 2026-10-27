@@ -4,8 +4,13 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/check.sh` runs the format check on the changed C++ files and a Debug build in `build/check`, in the dev container. It is the check to run before a direct commit that touches C++ or the build.
+
 ### Changed
 
+- Small changes (`docs`, `style`, `chore`, tooling `build`) are committed directly to `main`, and risky ones (`feat`, `fix`, `refactor`, `perf`, `ci`, and `build` that changes `CMakeLists.txt` or a dependency version) go through a squashed pull request. A failing `main` is fixed before anything else, and a tag is created only on a commit whose CI run succeeded. See `docs/BRANCHING.md`.
 - The Zed tasks and debug scenarios run in the dev container through the Dev Containers CLI (`@devcontainers/cli`), and `.zed/docker.sh` is gone. The CLI reads the same `devcontainer.json` as the editor, so the container is not described twice. Both GPU configurations mount the project at its host path, so build outputs and debugger source paths match the host.
 
 ## [0.2.0] - 2026-10-27

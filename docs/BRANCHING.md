@@ -1,14 +1,14 @@
 <!-- covers: CMakeLists.txt, .devcontainer/, .github/workflows/ -->
 # Branching and releases
 
-Nodens keeps one trunk. Every change integrates into `main` continuously, and a release is an annotated tag on `main` followed by a CI job that publishes it. A single shared main branch, rather than long-lived branches merged into a release line infrequently, is what trunk-based development means.[^orosz]
+Nodens keeps one trunk. Every change integrates into `main` continuously, either as a direct commit or through a short pull request, and a release is an annotated tag on `main` followed by a CI job that publishes it. A single shared main branch, rather than long-lived branches merged into a release line infrequently, is what trunk-based development means.[^orosz]
 
 ## Branch roles
 
 | Branch | Purpose | Lifetime | Ends by |
 |---|---|---|---|
 | `main` | The trunk and the only published lineage. Every commit on it builds. | Permanent | Never |
-| `feature/<slug>` | One change, cut from `main`. | Hours to a few days | Squashed into `main` through a pull request |
+| `feature/<slug>` | One change that takes the pull request route (see [Which route](#which-route)), cut from `main`. | Hours to a few days | Squashed into `main` through a pull request |
 | `hotfix/<slug>` | A fix for a tag that already shipped, cut from that tag. | Hours | Squashed into `main`, then a patch tag on `main` |
 | `release/<version>` | A released line that must stay stable while `main` moves on. | One release cycle | Deleted after the last patch tag |
 
@@ -16,8 +16,8 @@ Nodens keeps one trunk. Every change integrates into `main` continuously, and a 
 
 ## Rules
 
-1. `main` always builds and always passes its checks. Nothing enters it that has not passed CI.[^orosz-health]
-2. Every change enters `main` through a pull request and lands as one squashed commit, so the trunk reads one commit per change. Commit and pull request title conventions are in [Committing](COMMITTING.md).
+1. `main` is kept green.[^orosz-health] A failing `main` is fixed before any other change, and a tag is created only on a commit whose CI run succeeded.
+2. A change takes one of two routes, by the type of the commit (see [Which route](#which-route)). A small change is committed directly to `main`; a risky one goes through a pull request and lands as one squashed commit. Commit and pull request title conventions are in [Committing](COMMITTING.md).
 3. A merge that forms a release uses `--no-ff`, so the release boundary stays visible in history.
 4. Tags are annotated, named `vMAJOR.MINOR.PATCH`, and created on `main` only.
 5. While the major version is 0, a breaking change bumps the minor version: 0.1.0 becomes 0.2.0, never 0.1.1.
@@ -27,7 +27,8 @@ Nodens keeps one trunk. Every change integrates into `main` continuously, and a 
 
 ```mermaid
 flowchart TD
-  A[feature or hotfix branch] -->|pull request, checks green, squash| B[main]
+  X[small change] -->|check script, direct commit| B[main]
+  A[feature or hotfix branch] -->|pull request, checks green, squash| B
   B -->|annotated tag| C[v0.1.0]
   C -->|bug reported| D[fix branch off the tag]
   D -->|pull request, checks green, squash| B
@@ -35,6 +36,23 @@ flowchart TD
 ```
 
 Every arrow points at `main`. Only tags and short-lived fixes leave it.
+
+## Which route
+
+The type of the commit decides the route. When a change mixes types, it takes the riskier route.
+
+| Route | Commit types | Why |
+|---|---|---|
+| Direct to `main` | `docs`, `style`, `chore`, `build` for tooling and the development environment (`.devcontainer/`, `.zed/`, `scripts/`), release preparation | They do not change what the library compiles to, or they are cheap to undo |
+| Pull request | `feat`, `fix`, `refactor` and `perf` (compiled code or its public API), `build` that changes `CMakeLists.txt`, `cmake/` or a dependency version, and `ci` | A mistake breaks the build for everyone, or breaks CI itself, so CI runs before the change lands |
+
+Before a direct commit that touches C++ or the build, run `bash scripts/check.sh` in the dev container. It checks the formatting of the C++ files changed from `origin/main`, then configures and builds Debug with Clang and Ninja, the same steps as the `format` job and a Debug `build` job:
+
+```bash
+devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json bash scripts/check.sh
+```
+
+A direct commit gets no CI run before it lands, only the push run after it, so a red push run is fixed first (rule 1).
 
 ## Cutting 0.1.0
 
@@ -83,6 +101,17 @@ gh pr create --base main --fill
 
 Merge it with "Squash and merge", then delete the branch.
 
+A small change:
+
+```bash
+git switch main
+git pull --ff-only
+# edit; for C++ or build changes, run scripts/check.sh
+git add path/to/file
+git commit
+git push
+```
+
 A fix for a shipped version:
 
 ```bash
@@ -99,12 +128,30 @@ git push origin v0.1.1
 
 The fix lands on `main` first and is tagged there. When a `release/<version>` branch exists, cherry-pick the commit onto it and tag the patch there instead.
 
+## Cutting a release
+
+On `main`, with a clean tree:
+
+- give the version a dated section in `CHANGELOG.md`, moved out of `Unreleased`; the release job publishes that section as the release notes
+- set `project(Nodens VERSION ...)` in `CMakeLists.txt` to the new version, because the release job refuses a tag that does not match
+- commit it directly as `chore(release): prepare X.Y.Z` and push
+
+Wait for the CI run on that commit, and tag only when it succeeded:
+
+```bash
+gh run list --branch main --commit "$(git rev-parse HEAD)"
+git tag -a vX.Y.Z -m "Nodens X.Y.Z"
+git push origin vX.Y.Z
+```
+
+The tag push runs the release job, which builds the tag again, archives the source and publishes the GitHub Release.
+
 ## What CI checks, and when
 
 | Event | Jobs | What it proves |
 |---|---|---|
 | Pull request into `main` | `format`, `build` for Debug, Release and Profiling | the change compiles in all three configurations, keeps the Vulkan backend, and is formatted |
-| Push to `main` | `format`, `build` | the trunk stays releasable |
+| Push to `main` | `format`, `build` | the trunk stays releasable; for a direct commit this is its only CI run, after it lands |
 | Tag `v*` | `build`, `release` | the tagged commit builds and the release is published from it |
 
 The jobs run inside the project's own development image, so CI uses the same compiler and CMake as the dev container (the image is named in each config under `.devcontainer/`). They also assert that the Vulkan backend was compiled in, because a missing Vulkan SDK would otherwise reduce the build to OpenGL without anyone noticing (`CMakeLists.txt` looks for Vulkan with `find_package(Vulkan QUIET)`, so a missing SDK is not an error).
@@ -123,6 +170,8 @@ Continuous integration means integrating back to the main branch frequently, thr
 
 ## Common slips
 
+- Pushing a direct commit that touches C++ or the build without running `scripts/check.sh`. CI will catch it, but only after it is on `main`.
+- Tagging before the CI run on that commit has finished.
 - A branch that lives for weeks is deferred integration, not a strategy. Either give it a version number and call it a release branch, or split it.
 - Tagging from a hotfix branch instead of `main` leaves the fix out of the trunk.
 - Editing `CHANGELOG.md` after the tag produces notes that describe a tree that no longer exists.

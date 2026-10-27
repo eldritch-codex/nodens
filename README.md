@@ -1,114 +1,89 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT) 
-![Supported platforms: Linux ](https://img.shields.io/badge/Supported%20platforms-Linux-blue.svg?style=flat-square)
+<h1 align="center">Nodens</h1>
 
-> ⚠️ **Development Status:** Nodens **0.2.0** is the current release, and the framework remains in **active, experimental development**. It serves primarily as a learning ground and playground for exploring game engine architecture and modern C++20/23 features. While the major version is 0, APIs are highly subject to change and a breaking change bumps the minor version.
+<h3 align="center">An experimental C++23 framework for interactive desktop applications.</h3>
+
+<p align="center">
+  <a href="https://github.com/eldritch-codex/nodens/releases"><img src="https://img.shields.io/github/v/release/eldritch-codex/nodens?style=flat-square&amp;label=release" alt="Latest release"></a>
+  <a href="https://github.com/eldritch-codex/nodens/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/eldritch-codex/nodens/ci.yml?branch=main&amp;style=flat-square&amp;label=CI" alt="CI status"></a>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue?style=flat-square" alt="C++23">
+  <img src="https://img.shields.io/badge/CMake-3.30-blue?style=flat-square" alt="CMake 3.30">
+  <img src="https://img.shields.io/badge/platform-Linux-blue?style=flat-square" alt="Platform: Linux">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/eldritch-codex/nodens/wiki/Getting-Started">Getting Started</a> ·
+  <a href="https://github.com/eldritch-codex/nodens/wiki">Wiki</a> ·
+  <a href="https://github.com/eldritch-codex/template-nodens-app">Application Template</a>
+</p>
+
+> **Status:** Nodens is experimental and under active development. APIs change freely, and a breaking change bumps the minor version.
 >
-> **Known limitations in 0.2.0:**
-> - Linux only: the validated environment is Arch Linux, and native Windows and macOS builds are not supported.
-> - The Vulkan backend covers window, swapchain, frame synchronization and ImGui rendering. Nodens exposes no renderer API of its own, since renderers such as Nyar borrow the window's graphics backend.
-> - A release is the tagged source plus its changelog section as the notes: there are no install rules, binary packages or hosted API documentation yet.
-> - The test suite is not in place yet, so CI gates on a successful build, the Vulkan backend assertion and formatting.
+> **Limitations:** Arch Linux is the only validated host, so Windows and macOS are unsupported. A release is the tagged source plus its changelog section: no install rules, binary packages or hosted API documentation, and the test suite is not written yet.
 
-# Introduction
+## Introduction
 
-**Nodens** is an experimental C++23 framework designed for rapidly developing interactive desktop applications with an optional immediate mode graphical user interface. 
+**Nodens** unifies third-party libraries ([ImGui](https://github.com/ocornut/imgui), [ImPlot](https://github.com/epezent/implot), [ImPlot3D](https://github.com/brenocq/implot3d), [Tracy](https://github.com/wolfpld/tracy)) with a custom core that integrates four systems:
 
-It unifies excellent third-party libraries (e.g. [ImGui](https://github.com/ocornut/imgui), [ImPlot](https://github.com/epezent/implot), [ImPlot3D](https://github.com/brenocq/implot3d), [Tracy](https://github.com/wolfpld/tracy)) with a custom core that integrates 4 main systems:
-- **GLFW Windows** with both OpenGL and Vulkan backends.
-- **Layer System** that governs the application lifetime and execution flow, visual rendering priority and input event routing (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Layer-System));
-- **Event System** with InputEvent routing through the LayerStack and a pub/sub thread-safe EventBus for both immediate and queued dispatch of custom event types (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Event-System));
+- **GLFW Windows** with OpenGL and Vulkan backends. Nodens exposes no renderer API of its own, since renderers such as [Nyar](https://github.com/eldritch-codex/nyar) borrow the window's graphics backend.
+- **Layer System** that governs the application lifetime, execution flow, render priority and input event routing (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Layer-System)).
+- **Event System** with InputEvent routing through the LayerStack, plus a thread-safe pub/sub EventBus with immediate and queued dispatch (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Event-System)).
 - **Task System** for multithreaded task execution (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Concurrency-and-TaskSystem)).
 
-Nodens follows a **module-first architecture** where public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`.
+Nodens follows a **module-first architecture**: public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`. A project takes Nodens from CMake with `FetchContent`.
 
-The framework compiles into a single **static library** that is linked to your application, ensuring the final product is a single portable executable to streamline distribution.
+The framework compiles into a single **static library** linked to your application, so the result is one portable executable.
 
-# Documentation
+Documentation: the [wiki](https://github.com/eldritch-codex/nodens/wiki) holds tutorials, architecture guides and how-tos, including [Building and Toolchain](https://github.com/eldritch-codex/nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/eldritch-codex/nodens/wiki/Profiling-with-Tracy); the API reference is Doxygen output built with `cmake --build build --target nodens-docs`, not yet hosted.
 
-| Resource | Description |
-|----------|-------------|
-| **[Wiki](https://github.com/eldritch-codex/nodens/wiki)** | Tutorials, architecture guides, and how-to articles |
-| **API Reference** | Doxygen-generated class and function documentation - *not yet hosted; build locally with `cmake --build build --target nodens-docs`* |
+## Example Applications
 
-# Quick Start
-
-> 📖 For build, integration, and development-environment instructions, see the **[Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started)** wiki page.
-
-> ⚠️ **Platform limitation:** The supported and validated development environment is based on Arch Linux and currently builds Nodens for **Linux only**. Native Windows and macOS builds are not currently supported or validated.
-
-For new applications, start from the [Nodens Application Template](https://github.com/eldritch-codex/template-nodens-app). Nodens can also be consumed from CMake with `FetchContent`; the wiki covers framework development, local checkouts, and native Linux builds.
-
-Build configurations and their options are documented in the wiki, under [Building and Toolchain](https://github.com/eldritch-codex/nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/eldritch-codex/nodens/wiki/Profiling-with-Tracy).
-
-## Development Environment
-
-Nodens includes a Linux Dev Container using
-`ghcr.io/eldritch-codex/arch-dev:main`. Open the repository in Zed or
-Visual Studio Code, then reopen it in the Dev Container.
-
-When your editor asks which configuration to open, choose `nvidia` or `dri`
-(Intel/AMD). NVIDIA hosts need the host NVIDIA driver and NVIDIA Container
-Toolkit first.
-
-See [Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started)
-for host setup, toolkit installation, GPU configuration, and build instructions.
-
-# Example Applications
-
-Nodens includes several examples in the `examples/` directory:
+Examples live in `examples/`:
 
 | Example | Demonstrates |
 |---------|-------------|
-| **`circularwave3d`** | Immediate mode GUI, real-time 2D/3D plotting with ImPlot and ImPlot3D |
-| **`planetaryscan`** | Pub/Sub event bus, multi-threaded task system with thread-safe data collection, live scatter plot visualization |
+| **`circularwave3d`** | Immediate mode GUI, live 2D and 3D plotting with ImPlot and ImPlot3D |
+| **`planetaryscan`** | Pub/sub event bus, multithreaded task system with thread-safe data collection, live scatter plot |
 
-> 📖 For detailed walkthroughs of each example, see the **[Examples Guide](https://github.com/eldritch-codex/nodens/wiki/Examples-Guide)** on the wiki.
+### Profiling a multithreaded workload
 
-##### Multithreaded Workload Profiling Showcase
 https://github.com/user-attachments/assets/4d345eb7-46c5-4360-a7f0-55466ec753ff
 
-
-# Other Applications Showcase
-
-Applications I used in my own research on numerical simulations using earlier versions of Nodens.
+### Applications from earlier Nodens versions, used in numerical-simulation research
 
 https://github.com/user-attachments/assets/3025146c-d49b-4a10-84ea-3dcfa74ac59e
 
 https://github.com/user-attachments/assets/28be4bea-d0bd-46aa-bd1c-004daedd4243
 
+## Dependencies
 
-# Dependencies
+Dependencies are fetched at configure time with CMake `FetchContent` and built from source, except GLAD, which is vendored in `vendor/glad`.
 
-All dependencies are resolved automatically at configure time via CMake `FetchContent` and are downloaded and built from source (except from glad which is included in the `vendor` folder). 
+| Library | Description | Version |
+| :-- | :-- | :-- |
+| **[GLAD](https://glad.dav1d.de/)** | OpenGL function loader | v0.1.35 |
+| **[GLFW](https://www.glfw.org/)** | Window, context and input | 3.4 |
+| **[ImGui](https://github.com/ocornut/imgui)** | Immediate mode GUI | v1.92.9b-docking |
+| **[ImPlot](https://github.com/epezent/implot)** | 2D plotting for ImGui | v1.1 |
+| **[ImPlot3D](https://github.com/brenocq/implot3d)** | 3D plotting for ImGui | v0.4 |
+| **[spdlog](https://github.com/gabime/spdlog)** | Logging | v1.17.0 |
+| **[Tracy](https://github.com/wolfpld/tracy)** | Frame and GPU profiler | v0.14.1 |
 
-| Library                                             | Description                                               | Version            | 
-| :-------------------------------------------------- | :-------------------------------------------------------- | :----------------- | 
-| **[GLAD](https://glad.dav1d.de/)**                  | OpenGL function loader.                                   | v0.1.35            | 
-| **[GLFW](https://www.glfw.org/)**                   | Cross-platform for window, context, and input management. | 3.4                | 
-| **[ImGui](https://github.com/ocornut/imgui)**       | Bloat-free Immediate Mode GUI.                            | v1.92.9b-docking |
-| **[ImPlot](https://github.com/epezent/implot)**     | 2D data plotting extension for ImGui.                     | v1.1               | 
-| **[ImPlot3D](https://github.com/brenocq/implot3d)** | 3D data plotting extension for ImGui.                     | v0.4               | 
-| **[spdlog](https://github.com/gabime/spdlog)**      | Fast, header-only/compiled logging library.               | v1.17.0            | 
-| **[Tracy](https://github.com/wolfpld/tracy)**       | Real-time frame and GPU profiler.                         | v0.14.1 |
+## Acknowledgements
 
-# Acknowledgements
+A special thanks to **TheCherno**, whose [Game Engine series](http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) inspired the foundational architecture of Nodens.
 
-A special thanks to **TheCherno**. The foundational architecture of Nodens was heavily inspired by the early episodes of his excellent [Game Engine series](http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT) on YouTube.
+Nodens began as my undergraduate Computer Graphics project at UFMG in 2022, and early versions powered [boids](https://github.com/renanbomtempo/boids) and [galaxians](https://github.com/renanbomtempo/galaxians). The origins of the project are told in [this discussion](https://github.com/orgs/eldritch-codex/discussions/1).
 
-Additionally, Nodens originally began as a personal project for my undergraduate Computer Graphics course at UFMG. Early iterations of this framework powered several of my academic projects, including [boids](https://github.com/renanbomtempo/boids) and [galaxians](https://github.com/renanbomtempo/galaxians).
+In September 2026 I started experimenting with LLM coding agents (Claude Code, ZedAI and Pi) and even decided to develop my own: [Armitage](https://eldritchcodex.com/armitage/). I use them mostly to learn new stuff, but also they help with documentation, CI/CD and general project upkeep. Commits carry no co-author or AI attribution trailers, since I am responsible for every commit.
 
-# AI assistance
+## Suggested reading
 
-The architecture and the code of Nodens are written by the maintainer. Coding agents, Claude Code and the maintainer's own agent, Armitage, help with writing documentation and with understanding CI/CD tooling.
+Books worth reading if you work on Nodens or build on it:
 
-Commits carry no co-author or AI attribution trailers, because the maintainer is responsible for every commit. This section is where the use of agents is disclosed.
+- Jason Gregory, *Game Engine Architecture*, Third edition (Boca Raton London New York: CRC Press, Taylor & Francis Group, 2019). Engine architecture.
+- Ivor Horton and Peter Van Weert, *Beginning C++23: From Beginner to Pro* (Berkeley, CA: Apress, 2023). https://doi.org/10.1007/978-1-4842-9343-0. Modern C++ up to C++23, which Nodens targets.
 
-# References
+## License
 
-- Gregory, J. (2019) *Game Engine Architecture*. Third edition. CRC Press.
-- Horton, I. and Van Weert, P. (2023) Beginning C++23: From Beginner to Pro. Berkeley, CA: Apress. Available at: https://doi.org/10.1007/978-1-4842-9343-0.
-- The Cherno (no date) Game Engine Series, YouTube. Available at: http://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT.
-
-# License
-Copyright (c) 2026 EldritchCodex.
-This project and its entire history are licensed under the MIT License.
+Copyright (c) 2026 EldritchCodex. The project and its entire history are licensed under the MIT License.

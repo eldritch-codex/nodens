@@ -7,6 +7,9 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 ### Changed
 
 - The job system type is `TaskSystem`, renamed from `JobSystem`, and the accessor is `Application::GetTaskSystem()`. In the engine literature a job system drains a queue of jobs that run to completion, with coroutines or fibers for jobs that sleep and counters to join a batch (Gregory 2019, pp. 553-555), while this pool takes one callable and returns a future; see `docs/naming.md`.
+- The graphics types are `IGraphicsBackend`, `OpenGLBackend` and `VulkanBackend`, renamed from `IGraphicsContext`, `OpenGLContext` and `VulkanContext`, and `IWindow::GetBackend()` replaces `GetGraphicsContext()`. The interface covers backend initialization and frame presentation, and Vulkan owns an instance, a device and a swapchain rather than a context, so the shared word cannot be context; the window's member is `m_Backend`.
+- The theme enum is `ETheme`, renamed from `EDefaultTheme`. Its first member is `None`, so the word default belongs to the appliers, which keep their names, and the theme field on `FApplicationConfig` is `Theme`; the module keeps the name `Nodens.DefaultTheme`.
+- The startup structs are `FWindowConfig` and `FApplicationConfig`, renamed from `FWindowProps` and `FApplicationSpecification`, and the names that hold them follow: the window factory and the `Application` constructor take `config`, and the examples hold `appConfig`. `FWindowConfig::API` is now `GraphicsAPI`, matching the enum and the application config.
 
 ## [0.1.1] - 2026-10-27
 

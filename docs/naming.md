@@ -6,6 +6,18 @@ Nodens names a type for its role, and the kind marker says what kind of declarat
 
 The implementation carries the platform word and the interface keeps the role word: `IWindow` with `GlfwWindow`, and `IGraphicsBackend` with `OpenGLBackend` or `VulkanBackend`.
 
+## Why the graphics interface is a backend
+
+`IGraphicsBackend` covers initialization and frame presentation, and nothing else. OpenGL presents by swapping its window buffers, and Vulkan presents through its swapchain; a context is an OpenGL object, so the shared word is backend, and `IWindow::GetBackend()` returns it.
+
+## Why the theme enum is `ETheme`
+
+The enum's first member is `None`, and the appliers are free functions named `ApplyDefaultDarkTheme` and `ApplyDefaultLightTheme`. "Default" describes what the appliers do, not what the enum holds, so the field on `FApplicationConfig` is `Theme` and the module keeps the word for its appliers.
+
+## Why the startup structs are `*Config`
+
+Both structs hold the values a caller sets before the application starts, and the window struct's own documentation called them configuration properties. Wherever one is held, the name is `config`: the constructor parameter, the window local `windowConfig`, and the examples' `appConfig`.
+
 ## Why the thread pool is `TaskSystem`
 
 Task-based submission is one callable plus a handle to its result: `std::async` and `std::packaged_task` "shift the thread management responsibility to the implementer of the C++ Standard Library" and return a `std::future`.[^meyers] This pool does exactly that, one callable at a time.

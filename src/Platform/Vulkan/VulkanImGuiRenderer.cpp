@@ -22,7 +22,7 @@ void VulkanImGuiRenderer::Init(GLFWwindow* window)
     ImGui_ImplGlfw_InitForVulkan(window, true);
 
     const VkFormat colorFormat =
-        static_cast<VkFormat>(m_Context.GetSwapchainSurfaceFormat().format);
+        static_cast<VkFormat>(m_Backend.GetSwapchainSurfaceFormat().format);
     // The backend creates its pipeline from this format, so it must match Nodens' swapchain image.
     const VkPipelineRenderingCreateInfo renderingInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
@@ -32,14 +32,14 @@ void VulkanImGuiRenderer::Init(GLFWwindow* window)
 
     ImGui_ImplVulkan_InitInfo initInfo{};
     initInfo.ApiVersion = VK_API_VERSION_1_3;
-    initInfo.Instance = static_cast<VkInstance>(m_Context.GetInstance());
-    initInfo.PhysicalDevice = static_cast<VkPhysicalDevice>(*m_Context.GetPhysicalDevice());
-    initInfo.Device = static_cast<VkDevice>(*m_Context.GetDeviceRAII());
-    initInfo.QueueFamily = m_Context.GetGraphicsQueueFamilyIndex();
-    initInfo.Queue = static_cast<VkQueue>(*m_Context.GetGraphicsQueueRAII());
+    initInfo.Instance = static_cast<VkInstance>(m_Backend.GetInstance());
+    initInfo.PhysicalDevice = static_cast<VkPhysicalDevice>(*m_Backend.GetPhysicalDevice());
+    initInfo.Device = static_cast<VkDevice>(*m_Backend.GetDeviceRAII());
+    initInfo.QueueFamily = m_Backend.GetGraphicsQueueFamilyIndex();
+    initInfo.Queue = static_cast<VkQueue>(*m_Backend.GetGraphicsQueueRAII());
     initInfo.DescriptorPoolSize = 1000;
-    initInfo.MinImageCount = m_Context.GetFramesInFlight();
-    initInfo.ImageCount = static_cast<uint32_t>(m_Context.GetSwapchainImages().size());
+    initInfo.MinImageCount = m_Backend.GetFramesInFlight();
+    initInfo.ImageCount = static_cast<uint32_t>(m_Backend.GetSwapchainImages().size());
     initInfo.UseDynamicRendering = true;
     initInfo.PipelineInfoMain.PipelineRenderingCreateInfo = renderingInfo;
 
@@ -49,7 +49,7 @@ void VulkanImGuiRenderer::Init(GLFWwindow* window)
 
 void VulkanImGuiRenderer::Shutdown()
 {
-    m_Context.WaitIdle();
+    m_Backend.WaitIdle();
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 }
@@ -64,7 +64,7 @@ void VulkanImGuiRenderer::NewFrame()
     ImGuiIO& io = ImGui::GetIO();
     if (io.DisplaySize.x > 0.0f && io.DisplaySize.y > 0.0f)
     {
-        const vk::Extent2D framebufferExtent = m_Context.GetSwapchainExtent();
+        const vk::Extent2D framebufferExtent = m_Backend.GetSwapchainExtent();
         io.DisplayFramebufferScale = ImVec2{
             static_cast<float>(framebufferExtent.width) / io.DisplaySize.x,
             static_cast<float>(framebufferExtent.height) / io.DisplaySize.y,
@@ -74,10 +74,10 @@ void VulkanImGuiRenderer::NewFrame()
 
 void VulkanImGuiRenderer::RenderDrawData(ImDrawData* drawData)
 {
-    if (!drawData || drawData->TotalVtxCount == 0 || !m_Context.IsFrameActive())
+    if (!drawData || drawData->TotalVtxCount == 0 || !m_Backend.IsFrameActive())
         return;
 
-    auto& commandBuffer = m_Context.GetActiveCommandBuffer();
+    auto& commandBuffer = m_Backend.GetActiveCommandBuffer();
     // Nyar rendered this attachment earlier in the same command buffer; make its writes visible
     // before ImGui loads the image and overlays its draw data.
     const vk::ImageMemoryBarrier2 barrier{
@@ -90,7 +90,7 @@ void VulkanImGuiRenderer::RenderDrawData(ImDrawData* drawData)
         .newLayout = vk::ImageLayout::eColorAttachmentOptimal,
         .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
         .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
-        .image = m_Context.GetSwapchainImages()[m_Context.GetCurrentImageIndex()],
+        .image = m_Backend.GetSwapchainImages()[m_Backend.GetCurrentImageIndex()],
         .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
                              .baseMipLevel = 0,
                              .levelCount = 1,
@@ -102,20 +102,20 @@ void VulkanImGuiRenderer::RenderDrawData(ImDrawData* drawData)
     commandBuffer.pipelineBarrier2(dependencyInfo);
 
     const vk::RenderingAttachmentInfo attachment{
-        .imageView = *m_Context.GetSwapchainImageViews()[m_Context.GetCurrentImageIndex()],
+        .imageView = *m_Backend.GetSwapchainImageViews()[m_Backend.GetCurrentImageIndex()],
         .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
         .loadOp = vk::AttachmentLoadOp::eLoad,
         .storeOp = vk::AttachmentStoreOp::eStore,
     };
     const vk::RenderingInfo renderingInfo{
-        .renderArea = {.offset = {0, 0}, .extent = m_Context.GetSwapchainExtent()},
+        .renderArea = {.offset = {0, 0}, .extent = m_Backend.GetSwapchainExtent()},
         .layerCount = 1,
         .colorAttachmentCount = 1,
         .pColorAttachments = &attachment,
     };
 
     TracyVkZone(
-        static_cast<TracyVkCtx>(m_Context.GetGpuProfilerContext(m_Context.GetCurrentFrameIndex())),
+        static_cast<TracyVkCtx>(m_Backend.GetGpuProfilerContext(m_Backend.GetCurrentFrameIndex())),
         *commandBuffer,
         "ImGui");
 

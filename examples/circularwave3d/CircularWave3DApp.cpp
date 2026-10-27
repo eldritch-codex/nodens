@@ -10,14 +10,14 @@ import std;
 class CircularWave3DApp : public Nodens::Application
 {
 public:
-    static inline const Nodens::FApplicationSpecification appSpecifications = {
+    static inline const Nodens::FApplicationConfig appConfig = {
         .Name = "[NodensApp Example] CircularWave3D",
         .WindowWidth = 800,
         .WindowHeight = 600,
         .EnableGUI = true,
     };
 
-    CircularWave3DApp() : Application(appSpecifications)
+    CircularWave3DApp() : Application(appConfig)
     {
         PushLayer(new CircularWave3DLayer());
     }

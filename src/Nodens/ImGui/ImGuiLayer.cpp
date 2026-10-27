@@ -44,7 +44,7 @@ void ImGuiLayer::OnAttach()
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    if (Application::Get().GetSpecification().GraphicsAPI == EGraphicsAPI::OpenGL)
+    if (Application::Get().GetConfig().GraphicsAPI == EGraphicsAPI::OpenGL)
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigFlags |= ImGuiDockNodeFlags_PassthruCentralNode;
 
@@ -121,7 +121,7 @@ void ImGuiLayer::End()
         GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
-        if (app.GetSpecification().GraphicsAPI == EGraphicsAPI::OpenGL)
+        if (app.GetConfig().GraphicsAPI == EGraphicsAPI::OpenGL)
             glfwMakeContextCurrent(backup_current_context);
     }
 }

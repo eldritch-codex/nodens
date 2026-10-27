@@ -9,14 +9,14 @@ import Example.PlanetaryScanLayer;
 class PlanetaryScanApp : public Nodens::Application
 {
 public:
-    static inline const Nodens::FApplicationSpecification appSpecifications = {
+    static inline const Nodens::FApplicationConfig appConfig = {
         .Name = "[NodensApp Example] PlanetaryScans",
         .WindowWidth = 800,
         .WindowHeight = 600,
         .EnableGUI = true,
     };
 
-    PlanetaryScanApp() : Application(appSpecifications)
+    PlanetaryScanApp() : Application(appConfig)
     {
         PushLayer(new PlanetaryScanLayer());
     }

@@ -30,8 +30,7 @@ namespace Nodens
 
 Application* Application::s_Instance = nullptr;
 
-Application::Application(const FApplicationSpecification& specification)
-    : m_Specification(specification)
+Application::Application(const FApplicationConfig& config) : m_Config(config)
 {
     ZoneScoped;
 
@@ -44,44 +43,44 @@ Application::Application(const FApplicationSpecification& specification)
     m_LayerStack = std::make_unique<LayerStack>();
     m_EventBus = std::make_unique<EventBus>();
 
-    FWindowProps props{
-        .Title = m_Specification.Name,
-        .Width = m_Specification.WindowWidth,
-        .Height = m_Specification.WindowHeight,
-        .VSync = m_Specification.VSync,
-        .API = m_Specification.GraphicsAPI,
+    FWindowConfig windowConfig{
+        .Title = m_Config.Name,
+        .Width = m_Config.WindowWidth,
+        .Height = m_Config.WindowHeight,
+        .VSync = m_Config.VSync,
+        .GraphicsAPI = m_Config.GraphicsAPI,
     };
-    m_Window = std::unique_ptr<IWindow>(IWindow::Create(props));
+    m_Window = std::unique_ptr<IWindow>(IWindow::Create(windowConfig));
     m_Window->SetInputEventCallback([this](RoutedInputEvent& event) { OnInputEvent(event); });
 
-    if (m_Specification.EnableGUI)
+    if (m_Config.EnableGUI)
     {
         std::shared_ptr<ImGuiRenderer> imguiRenderer;
         bool rendererCreated{false};
 #if defined(ND_HAS_OPENGL)
-        if (m_Specification.GraphicsAPI == EGraphicsAPI::OpenGL)
+        if (m_Config.GraphicsAPI == EGraphicsAPI::OpenGL)
         {
             imguiRenderer = std::make_shared<OpenGLImGuiRenderer>();
             rendererCreated = true;
         }
 #endif
 #if defined(ND_HAS_VULKAN)
-        if (!rendererCreated && m_Specification.GraphicsAPI == EGraphicsAPI::Vulkan)
+        if (!rendererCreated && m_Config.GraphicsAPI == EGraphicsAPI::Vulkan)
         {
-            // Borrow the window's initialized context; the ImGui backend must not create a second
+            // Borrow the window's initialized backend; the ImGui backend must not create a second
             // device.
-            auto* context = dynamic_cast<VulkanBackend*>(m_Window->GetGraphicsContext());
-            if (!context)
-                FatalCore("Vulkan window has no Vulkan graphics context!");
-            imguiRenderer = std::make_shared<VulkanImGuiRenderer>(*context);
+            auto* backend = dynamic_cast<VulkanBackend*>(m_Window->GetBackend());
+            if (!backend)
+                FatalCore("Vulkan window has no Vulkan backend!");
+            imguiRenderer = std::make_shared<VulkanImGuiRenderer>(*backend);
             rendererCreated = true;
         }
 #endif
         if (!rendererCreated)
             FatalCore("ImGui renderer is not available for this graphics API!");
 
-        m_ImGuiLayer = new ImGuiLayer{imguiRenderer, m_Specification.DefaultTheme};
-        m_ImGuiLayer->BlockEvents(m_Specification.ShouldImGuiBlockInputs);
+        m_ImGuiLayer = new ImGuiLayer{imguiRenderer, m_Config.Theme};
+        m_ImGuiLayer->BlockEvents(m_Config.ShouldImGuiBlockInputs);
         PushOverlay(m_ImGuiLayer);
     }
 }
@@ -121,9 +120,9 @@ EventBus& Application::GetEventBus()
     return *m_EventBus;
 }
 
-const FApplicationSpecification& Application::GetSpecification() const
+const FApplicationConfig& Application::GetConfig() const
 {
-    return m_Specification;
+    return m_Config;
 }
 
 Application& Application::Get()
@@ -148,13 +147,13 @@ void Application::Run()
         m_EventBus->Flush();
 
 #if defined(ND_HAS_VULKAN)
-        if (m_Specification.GraphicsAPI == EGraphicsAPI::Vulkan)
+        if (m_Config.GraphicsAPI == EGraphicsAPI::Vulkan)
         {
             // Acquire once before layers run so Nyar and ImGui append to the same command buffer.
-            auto* context = dynamic_cast<VulkanBackend*>(m_Window->GetGraphicsContext());
-            if (!context)
-                FatalCore("Vulkan window has no Vulkan graphics context!");
-            context->BeginFrame();
+            auto* backend = dynamic_cast<VulkanBackend*>(m_Window->GetBackend());
+            if (!backend)
+                FatalCore("Vulkan window has no Vulkan backend!");
+            backend->BeginFrame();
         }
 #endif
 

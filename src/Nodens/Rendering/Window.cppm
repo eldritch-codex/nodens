@@ -1,5 +1,5 @@
 /// @file Window.cppm
-/// @brief Abstract window interface and creation properties.
+/// @brief Abstract window interface and its creation configuration.
 /// @ingroup Rendering
 
 export module Nodens.Window;
@@ -21,17 +21,17 @@ enum class EGraphicsAPI
     OpenGL,
 };
 
-/// @brief Configuration properties for creating a Window.
+/// @brief Configuration for creating a Window.
 /// @details Passed to the static IWindow::Create() factory. Provides sensible defaults
 ///          for title, dimensions, and VSync.
 /// @ingroup Rendering
-struct FWindowProps
+struct FWindowConfig
 {
-    std::string Title{"Nodens"};            ///< The window title displayed in the title bar.
-    unsigned int Width{1280};               ///< Initial window width in pixels.
-    unsigned int Height{720};               ///< Initial window height in pixels.
-    bool VSync{false};                      ///< Whether vertical synchronization is enabled.
-    EGraphicsAPI API{EGraphicsAPI::Vulkan}; ///< The graphics API to use for rendering.
+    std::string Title{"Nodens"}; ///< The window title displayed in the title bar.
+    unsigned int Width{1280};    ///< Initial window width in pixels.
+    unsigned int Height{720};    ///< Initial window height in pixels.
+    bool VSync{false};           ///< Whether vertical synchronization is enabled.
+    EGraphicsAPI GraphicsAPI{EGraphicsAPI::Vulkan}; ///< The graphics API to use for rendering.
 };
 
 /// @brief Abstract base class for a platform window.
@@ -41,7 +41,7 @@ struct FWindowProps
 ///
 ///          The concrete implementation (e.g., GlfwWindow) is created via the static
 ///          factory method Create().
-/// @see FWindowProps, GlfwWindow
+/// @see FWindowConfig, GlfwWindow
 /// @ingroup Rendering
 class IWindow
 {
@@ -80,16 +80,16 @@ public:
     /// @return Borrowed opaque pointer to the native window.
     virtual void* GetNativeWindow() const = 0;
 
-    /// @brief Returns the graphics context owned by the window.
+    /// @brief Returns the graphics backend owned by the window.
     /// @details The returned pointer is borrowed and remains valid until this window is destroyed.
-    ///          It may be null when the window uses `NoAPI` or when no context was created.
-    /// @return Borrowed graphics context, or null when no context exists.
-    virtual IGraphicsBackend* GetGraphicsContext() const = 0;
+    ///          It may be null when the window uses `NoAPI` or when no backend was created.
+    /// @return Borrowed backend, or null when none exists.
+    virtual IGraphicsBackend* GetBackend() const = 0;
 
     /// @brief Static factory method that creates a platform-specific Window.
-    /// @param props The configuration properties for the new window.
+    /// @param config The configuration for the new window.
     /// @return A raw pointer to the newly created IWindow. Caller takes ownership.
-    static IWindow* Create(const FWindowProps& props = FWindowProps());
+    static IWindow* Create(const FWindowConfig& config = FWindowConfig());
 };
 
 } // namespace Nodens

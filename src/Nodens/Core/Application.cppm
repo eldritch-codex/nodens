@@ -21,7 +21,7 @@ export namespace Nodens
 /// @details Provides sensible defaults for a windowed GUI application.
 ///          Pass a customized instance to the Application constructor to override.
 /// @ingroup Core
-struct FApplicationSpecification
+struct FApplicationConfig
 {
     std::string Name{"Nodens Application"}; ///< Window title and application identifier.
     std::uint32_t WindowWidth{1280};        ///< Initial window width in pixels.
@@ -31,7 +31,7 @@ struct FApplicationSpecification
     EGraphicsAPI GraphicsAPI{
         EGraphicsAPI::Vulkan}; ///< Client graphics API for the application window.
     bool ShouldImGuiBlockInputs{true};
-    ETheme DefaultTheme{ETheme::Dark};
+    ETheme Theme{ETheme::Dark}; ///< The visual theme applied by the ImGui layer.
 };
 
 /// @brief The central singleton that owns the window, layer stack, task system, and main loop.
@@ -54,15 +54,15 @@ struct FApplicationSpecification
 /// }
 /// @endcode
 ///
-/// @see ILayer, LayerStack, FApplicationSpecification
+/// @see ILayer, LayerStack, FApplicationConfig
 /// @ingroup Core
 class Application
 {
 public:
     /// @brief Constructs the application, creating the window, task system, and optional ImGui
     /// layer.
-    /// @param specification The configuration to use for initialization.
-    explicit Application(const FApplicationSpecification& specification);
+    /// @param config The configuration to use for initialization.
+    explicit Application(const FApplicationConfig& config);
 
     virtual ~Application();
 
@@ -92,12 +92,12 @@ public:
     TaskSystem& GetTaskSystem();
 
     /// @brief Returns a reference to the application's event bus.
-    /// @reutnr Reference to EventBus instance.
+    /// @return Reference to EventBus instance.
     EventBus& GetEventBus();
 
-    /// @brief Returns the specification used to initialize this application.
-    /// @return Const reference to the FApplicationSpecification.
-    const FApplicationSpecification& GetSpecification() const;
+    /// @brief Returns the configuration used to initialize this application.
+    /// @return Const reference to the FApplicationConfig.
+    const FApplicationConfig& GetConfig() const;
 
     /// @brief Retrieves the global singleton Application instance.
     /// @return Reference to the running Application.
@@ -110,8 +110,8 @@ private:
     ///         still receives it.
     bool OnWindowClose(InputEvents::WindowClose& e);
 
-    FApplicationSpecification m_Specification; ///< Stored copy of the startup configuration.
-    bool m_Running{true};                      ///< Main loop sentinel; false triggers shutdown.
+    FApplicationConfig m_Config; ///< Stored copy of the startup configuration.
+    bool m_Running{true};        ///< Main loop sentinel; false triggers shutdown.
 
     std::unique_ptr<IWindow> m_Window; ///< The platform window.
 

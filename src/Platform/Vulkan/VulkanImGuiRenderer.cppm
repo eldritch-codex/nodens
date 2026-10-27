@@ -24,9 +24,9 @@ export namespace Nodens
 class VulkanImGuiRenderer : public ImGuiRenderer
 {
 public:
-    /// @brief Constructs a renderer that borrows a Nodens Vulkan context.
-    /// @param context Nodens-owned Vulkan context with an initialized swapchain.
-    explicit VulkanImGuiRenderer(VulkanBackend& context) : m_Context(context)
+    /// @brief Constructs a renderer that borrows a Nodens Vulkan backend.
+    /// @param backend Nodens-owned Vulkan backend with an initialized swapchain.
+    explicit VulkanImGuiRenderer(VulkanBackend& backend) : m_Backend(backend)
     {
     }
 
@@ -47,6 +47,6 @@ public:
     void RenderDrawData(ImDrawData* drawData) override;
 
 private:
-    VulkanBackend& m_Context;
+    VulkanBackend& m_Backend;
 };
 } // namespace Nodens

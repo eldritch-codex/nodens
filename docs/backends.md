@@ -5,13 +5,13 @@ Nodens puts its graphics API behind two interfaces: `IGraphicsBackend` (`src/Nod
 
 ## Choosing a backend
 
-`FWindowProps` in `src/Nodens/Rendering/Window.cppm` defaults `API` to `EGraphicsAPI::Vulkan`.
+`FWindowConfig` in `src/Nodens/Rendering/Window.cppm` defaults `GraphicsAPI` to `EGraphicsAPI::Vulkan`.
 
 ## Renderer selection
 
 `Application` (`src/Nodens/Core/Application.cpp`) picks the ImGui renderer at startup:
 
-- When `ND_HAS_OPENGL` is defined and the specification asks for OpenGL, it creates an `OpenGLImGuiRenderer`.
+- When `ND_HAS_OPENGL` is defined and the configuration asks for OpenGL, it creates an `OpenGLImGuiRenderer`.
 - When `ND_HAS_VULKAN` is defined and it asks for Vulkan, it creates a `VulkanImGuiRenderer`.
 - When neither branch created one, `FatalCore` reports that the ImGui renderer is not available for this graphics API.
 

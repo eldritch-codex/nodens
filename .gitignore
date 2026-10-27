@@ -3,7 +3,6 @@
 .zed/*
 !.zed/tasks.json
 !.zed/debug.json
-!.zed/docker.sh
 !.zed/settings.json
 .vscode/
 __cmake_systeminformation/

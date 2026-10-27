@@ -1,14 +1,14 @@
 // See https://zed.dev/docs/tasks for documentation.
 //
-// Zed runs on the host; every task below executes inside the Docker container
-// defined by .devcontainer/nvidia or .devcontainer/dri (chosen by .zed/docker.sh,
-// override with NODENS_GPU). See .zed/docker.sh for the
-// container lifecycle (it is created on first use and reused afterwards).
+// Zed runs on the host; every task below executes inside the dev container with
+// the Dev Containers CLI (npm i -g @devcontainers/cli). Run "Docker: Start" once
+// per session. The tasks use the NVIDIA config; for Intel/AMD replace "nvidia"
+// with "dri" in .zed/tasks.json, .zed/debug.json and .zed/settings.json.
 [
     {
         "label": "[Nodens] Docker: Start",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash $ZED_MAIN_GIT_WORKTREE/.zed/docker.sh true",
+        "command": "devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -22,21 +22,7 @@
     {
         "label": "[Nodens] Docker: Stop",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "docker stop eldritchcodex-nodens",
-        "use_new_terminal": false,
-        "allow_concurrent_runs": false,
-        "reveal": "always",
-        "reveal_target": "dock",
-        "hide": "on_success",
-        "shell": "system",
-        "show_summary": true,
-        "show_command": true,
-        "save": "none",
-    },
-    {
-        "label": "[Nodens] Docker: Restart Debug Adapter",
-        "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh --debug-adapter",
+        "command": "docker stop eldritch-codex-nodens-nvidia",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -50,7 +36,7 @@
     {
         "label": "[Nodens] Config Debug",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -64,7 +50,7 @@
     {
         "label": "[Nodens] Config Release",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake -B build -S . -DCMAKE_BUILD_TYPE=Release",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Release",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -78,7 +64,7 @@
     {
         "label": "[Nodens] Config Profiling",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake -B build -S . -DCMAKE_BUILD_TYPE=Profiling -DND_BUILD_TRACY_PROFILER=ON",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Profiling -DND_BUILD_TRACY_PROFILER=ON",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -92,7 +78,7 @@
     {
         "label": "[Nodens] Build",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake --build build -j4",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build -j4",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -106,7 +92,7 @@
     {
         "label": "[Nodens] Build Clean",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake --build build --clean-first -j4",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --clean-first -j4",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -120,7 +106,7 @@
     {
         "label": "[Nodens] Build Tracy Profiler",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh cmake --build build --target tracy-profiler",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --target tracy-profiler",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -134,7 +120,7 @@
     {
         "label": "[Nodens] Run PlanetaryScan",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh ./build/examples/planetaryscan/example-planetaryscan",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/planetaryscan/example-planetaryscan",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -148,7 +134,7 @@
     {
         "label": "[Nodens] Run CircularWave3D",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "bash .zed/docker.sh ./build/examples/circularwave3d/example-circularwave3d",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/circularwave3d/example-circularwave3d",
         "use_new_terminal": false,
         "allow_concurrent_runs": false,
         "reveal": "always",

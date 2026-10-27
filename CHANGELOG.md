@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Changed
+
+- The Zed tasks and debug scenarios run in the dev container through the Dev Containers CLI (`@devcontainers/cli`), and `.zed/docker.sh` is gone. The CLI reads the same `devcontainer.json` as the editor, so the container is not described twice. Both GPU configurations mount the project at its host path, so build outputs and debugger source paths match the host.
+
 ## [0.2.0] - 2026-10-27
 
 ### Changed

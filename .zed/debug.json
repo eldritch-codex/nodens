@@ -1,9 +1,7 @@
 // Project-local debug scenarios.
 //
 // Zed runs on the host; the CodeLLDB adapter runs inside the Docker container
-// (see .zed/docker.sh). Zed connects to it over TCP, so the adapter must be
-// listening on 127.0.0.1:12345 first. The `build` step below both builds the
-// target and starts the adapter, so a normal debug launch is self-contained.
+// (see settings.json) and talks to Zed over stdio.
 //
 // For more documentation on how to configure debug scenarios,
 // see: https://zed.dev/docs/debugger
@@ -12,15 +10,11 @@
         "label": "Debug PlanetaryScan (Docker)",
         "adapter": "CodeLLDB",
         "request": "launch",
-        "tcp_connection": {
-            "host": "127.0.0.1",
-            "port": 12345
-        },
         "build": {
             "command": "bash",
             "args": [
                 "-c",
-                ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
+                "devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },
@@ -34,15 +28,11 @@
         "label": "Debug CircularWave3D (Docker)",
         "adapter": "CodeLLDB",
         "request": "launch",
-        "tcp_connection": {
-            "host": "127.0.0.1",
-            "port": 12345
-        },
         "build": {
             "command": "bash",
             "args": [
                 "-c",
-                ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
+                "devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },

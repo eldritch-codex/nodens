@@ -3,6 +3,8 @@
   "image": "ghcr.io/eldritch-codex/arch-dev:main",
   "runArgs": ["--gpus=all", "--name=eldritch-codex-nodens-nvidia"],
   "remoteUser": "eldritchcodex",
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+  "workspaceFolder": "${localWorkspaceFolder}",
   "mounts": [
     "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
     "source=${localEnv:XDG_RUNTIME_DIR},target=${localEnv:XDG_RUNTIME_DIR},type=bind"

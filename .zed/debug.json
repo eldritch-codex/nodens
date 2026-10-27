@@ -8,42 +8,48 @@
 // For more documentation on how to configure debug scenarios,
 // see: https://zed.dev/docs/debugger
 [
-  {
-    "label": "Debug PlanetaryScan (Docker)",
-    "adapter": "CodeLLDB",
-    "request": "launch",
-    "tcp_connection": { "host": "127.0.0.1", "port": 12345 },
-    "build": {
-      "command": "bash",
-      "args": [
-        "-c",
-        ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
-      ],
-      "cwd": "$ZED_WORKTREE_ROOT",
+    {
+        "label": "Debug PlanetaryScan (Docker)",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "tcp_connection": {
+            "host": "127.0.0.1",
+            "port": 12345
+        },
+        "build": {
+            "command": "bash",
+            "args": [
+                "-c",
+                ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
+            ],
+            "cwd": "$ZED_MAIN_GIT_WORKTREE",
+        },
+        "program": "$ZED_MAIN_GIT_WORKTREE/build/examples/planetaryscan/example-planetaryscan",
+        "cwd": "$ZED_MAIN_GIT_WORKTREE",
+        "args": [],
+        "env": {},
+        "stopOnEntry": false,
     },
-    "program": "$ZED_WORKTREE_ROOT/build/examples/planetaryscan/example-planetaryscan",
-    "cwd": "$ZED_WORKTREE_ROOT",
-    "args": [],
-    "env": {},
-    "stopOnEntry": false,
-  },
-  {
-    "label": "Debug CircularWave3D (Docker)",
-    "adapter": "CodeLLDB",
-    "request": "launch",
-    "tcp_connection": { "host": "127.0.0.1", "port": 12345 },
-    "build": {
-      "command": "bash",
-      "args": [
-        "-c",
-        ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
-      ],
-      "cwd": "$ZED_WORKTREE_ROOT",
+    {
+        "label": "Debug CircularWave3D (Docker)",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "tcp_connection": {
+            "host": "127.0.0.1",
+            "port": 12345
+        },
+        "build": {
+            "command": "bash",
+            "args": [
+                "-c",
+                ".zed/docker.sh cmake --build build && .zed/docker.sh --debug-adapter",
+            ],
+            "cwd": "$ZED_MAIN_GIT_WORKTREE",
+        },
+        "program": "$ZED_MAIN_GIT_WORKTREE/build/examples/circularwave3d/example-circularwave3d",
+        "cwd": "$ZED_MAIN_GIT_WORKTREE",
+        "args": [],
+        "env": {},
+        "stopOnEntry": false,
     },
-    "program": "$ZED_WORKTREE_ROOT/build/examples/circularwave3d/example-circularwave3d",
-    "cwd": "$ZED_WORKTREE_ROOT",
-    "args": [],
-    "env": {},
-    "stopOnEntry": false,
-  },
 ]

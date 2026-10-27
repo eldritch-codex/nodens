@@ -13,144 +13,164 @@ name: CI
 # container job, so the first step installs it when the image lacks it.
 
 on:
-  push:
-    branches: [main]
-    tags: ["v*"]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    push:
+        branches: [main]
+        tags: ["v*"]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 env:
-  ND_IMAGE: ghcr.io/eldritch-codex/arch-dev:main
+    ND_IMAGE: ghcr.io/eldritch-codex/arch-dev:main
 
 jobs:
-  format:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+    format:
+        name: Format
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
 
-      - name: List the C++ files this change touches
-        run: |
-          set -euo pipefail
-          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
-            git fetch --no-tags origin "${GITHUB_BASE_REF}"
-            git diff --name-only --diff-filter=ACMR "origin/${GITHUB_BASE_REF}...HEAD"
-          elif git rev-parse --verify --quiet HEAD^ >/dev/null; then
-            git diff --name-only --diff-filter=ACMR HEAD^ HEAD
-          else
-            git diff-tree --no-commit-id --name-only -r --root HEAD
-          fi | grep -E '\.(cpp|cppm|h|hpp|hxx)$' | grep -v '^vendor/' > changed.txt || true
-          echo "Files to check:"
-          cat changed.txt
+            - name: List the C++ files this change touches
+              run: |
+                  set -euo pipefail
+                  if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+                    git fetch --no-tags origin "${GITHUB_BASE_REF}"
+                    git diff --name-only --diff-filter=ACMR "origin/${GITHUB_BASE_REF}...HEAD"
+                  elif git rev-parse --verify --quiet HEAD^ >/dev/null; then
+                    git diff --name-only --diff-filter=ACMR HEAD^ HEAD
+                  else
+                    git diff-tree --no-commit-id --name-only -r --root HEAD
+                  fi | grep -E '\.(cpp|cppm|h|hpp|hxx)$' | grep -v '^vendor/' > changed.txt || true
+                  echo "Files to check:"
+                  cat changed.txt
 
-      - name: clang-format, using the dev image binary
-        run: |
-          set -euo pipefail
-          if [ ! -s changed.txt ]; then
-            echo "No C++ files changed, nothing to format."
-            exit 0
-          fi
-          docker run --rm -v "$PWD:/work" -w /work "${ND_IMAGE}" \
-            sh -c 'xargs -r clang-format --dry-run -Werror < changed.txt'
+            - name: clang-format, using the dev image binary
+              run: |
+                  set -euo pipefail
+                  if [ ! -s changed.txt ]; then
+                    echo "No C++ files changed, nothing to format."
+                    exit 0
+                  fi
+                  docker run --rm -v "$PWD:/work" -w /work "${ND_IMAGE}" \
+                    sh -c 'xargs -r clang-format --dry-run -Werror < changed.txt'
 
-  build:
-    name: Build (${{ matrix.config }})
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/eldritch-codex/arch-dev:main
-      options: --user root
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [Debug, Release, Profiling]
-    steps:
-      - name: Ensure Node.js for JavaScript actions
-        run: |
-          set -euo pipefail
-          command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
+    build:
+        name: Build (${{ matrix.config }})
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/eldritch-codex/arch-dev:main
+            options: --user root
+        strategy:
+            fail-fast: false
+            matrix:
+                config: [Debug, Release, Profiling]
+        steps:
+            - name: Ensure Node.js for JavaScript actions
+              run: |
+                  set -euo pipefail
+                  command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
 
-      - name: Check out
-        uses: actions/checkout@v7
+            - name: Check out
+              uses: actions/checkout@v7
 
-      - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+            - name: Configure
+              run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      - name: Assert that the Vulkan backend was compiled in
-        run: |
-          set -euo pipefail
-          if ! grep -q -- '-DND_HAS_VULKAN' build/compile_commands.json; then
-            echo "::error::ND_HAS_VULKAN is missing from the compile database, so the Vulkan SDK was not found and this build would be OpenGL only."
-            exit 1
-          fi
-          echo "Vulkan backend compiled in."
+            - name: Assert that the Vulkan backend was compiled in
+              run: |
+                  set -euo pipefail
+                  if ! grep -q -- '-DND_HAS_VULKAN' build/compile_commands.json; then
+                    echo "::error::ND_HAS_VULKAN is missing from the compile database, so the Vulkan SDK was not found and this build would be OpenGL only."
+                    exit 1
+                  fi
+                  echo "Vulkan backend compiled in."
 
-      - name: Build
-        run: cmake --build build --parallel
+            - name: Build
+              run: cmake --build build --parallel
 
-      - name: Test
-        if: ${{ hashFiles('tests/CMakeLists.txt') != '' }}
-        run: ctest --test-dir build --output-on-failure
+            - name: Test
+              if: ${{ hashFiles('tests/CMakeLists.txt') != '' }}
+              run: ctest --test-dir build --output-on-failure
 
-  release:
-    name: Release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/eldritch-codex/arch-dev:main
-      options: --user root
-    permissions:
-      contents: write
-    steps:
-      - name: Ensure Node.js and the GitHub CLI
-        run: |
-          set -euo pipefail
-          command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
-          command -v gh >/dev/null 2>&1 || pacman -Sy --noconfirm --needed github-cli
+    release:
+        name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        needs: build
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/eldritch-codex/arch-dev:main
+            options: --user root
+        permissions:
+            contents: write
+        steps:
+            - name: Ensure Node.js and the GitHub CLI
+              run: |
+                  set -euo pipefail
+                  command -v node >/dev/null 2>&1 || pacman -Sy --noconfirm --needed nodejs
+                  command -v gh >/dev/null 2>&1 || pacman -Sy --noconfirm --needed github-cli
 
-      - name: Check out the tagged commit
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+            - name: Check out the tagged commit
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
 
-      # The job runs as root but the workspace belongs to the runner user, so git
-      # refuses to read it ("dubious ownership") until it is marked safe.
-      - name: Trust the workspace for git
-        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+            # The job runs as root but the workspace belongs to the runner user, so git
+            # refuses to read it ("dubious ownership") until it is marked safe.
+            - name: Trust the workspace for git
+              run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-      - name: Check the tag against the project version
-        run: |
-          set -euo pipefail
-          tag="${GITHUB_REF_NAME#v}"
-          version="$(grep -oE 'project\(Nodens VERSION [0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | awk '{print $3}')"
-          if [ "${tag}" != "${version}" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match the project version ${version} in CMakeLists.txt."
-            exit 1
-          fi
-          echo "Tag ${GITHUB_REF_NAME} matches project version ${version}."
+            - name: Check the tag against the project version
+              run: |
+                  set -euo pipefail
+                  tag="${GITHUB_REF_NAME#v}"
+                  version="$(grep -oE 'project\(Nodens VERSION [0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | awk '{print $3}')"
+                  if [ "${tag}" != "${version}" ]; then
+                    echo "::error::Tag ${GITHUB_REF_NAME} does not match the project version ${version} in CMakeLists.txt."
+                    exit 1
+                  fi
+                  echo "Tag ${GITHUB_REF_NAME} matches project version ${version}."
 
-      - name: Build the tag
-        run: |
-          set -euo pipefail
-          cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-          cmake --build build --parallel
+            - name: Build the tag
+              run: |
+                  set -euo pipefail
+                  cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                  cmake --build build --parallel
 
-      - name: Archive the source
-        run: git archive --format=tar.gz --prefix="Nodens-${GITHUB_REF_NAME}/" -o "Nodens-${GITHUB_REF_NAME}.tar.gz" "${GITHUB_REF_NAME}"
+            - name: Archive the source
+              run: git archive --format=tar.gz --prefix="Nodens-${GITHUB_REF_NAME}/" -o "Nodens-${GITHUB_REF_NAME}.tar.gz" "${GITHUB_REF_NAME}"
 
-      - name: Publish the GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: gh release create "${GITHUB_REF_NAME}" "Nodens-${GITHUB_REF_NAME}.tar.gz" --title "Nodens ${GITHUB_REF_NAME#v}" --generate-notes
+            - name: Extract the changelog section
+              run: |
+                  set -euo pipefail
+                  version="${GITHUB_REF_NAME#v}"
+                  pattern="^## \\[${version//./\\.}\\]" awk '$0 ~ ENVIRON["pattern"] {f=1;next} /^## \[/{f=0} f' CHANGELOG.md \
+                  | awk '{ if ($0 ~ /^### /) sub(/^### /, "#### "); print }' \
+                  | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > release-notes.md
+                  test -s release-notes.md || { echo "::error::No changelog section for ${version}."; exit 1; }
+                  prev="$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)"
+                  if [ -n "${prev}" ]; then
+                      path="compare/${prev}...${GITHUB_REF_NAME}"
+                  else
+                      path="commits/${GITHUB_REF_NAME}"
+                  fi
+                  {
+                      echo
+                      echo "> [!NOTE]"
+                      echo "> **Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/${path}"
+                  } >> release-notes.md
+
+            - name: Publish the GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+              run: gh release create "${GITHUB_REF_NAME}" "Nodens-${GITHUB_REF_NAME}.tar.gz" --title "${GITHUB_REF_NAME#v}" --notes-file release-notes.md

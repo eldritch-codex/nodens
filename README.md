@@ -6,7 +6,7 @@
 > **Known limitations in 0.1.1:**
 > - Linux only: the validated environment is Arch Linux, and native Windows and macOS builds are not supported.
 > - The Vulkan backend covers window, swapchain, frame synchronization and ImGui rendering. Nodens exposes no renderer API of its own, since renderers such as Nyar borrow the Vulkan context.
-> - A release is the tagged source plus generated notes: there are no install rules, binary packages or hosted API documentation yet.
+> - A release is the tagged source plus its changelog section as the notes: there are no install rules, binary packages or hosted API documentation yet.
 > - The test suite is not in place yet, so CI gates on a successful build, the Vulkan backend assertion and formatting.
 
 # Introduction

@@ -50,7 +50,7 @@ Then switch the default branch to `main` in the GitHub repository settings. That
 
 Before tagging, on `main`:
 
-- give `0.1.0` a date in `CHANGELOG.md` and move its sections out of `Unreleased`
+- give `0.1.0` a date in `CHANGELOG.md` and move its sections out of `Unreleased`; the release job publishes that section as the release notes
 - replace the development-status block in `README.md` with the 0.1.0 status and its known limitations
 - confirm CI is green on `main`
 
@@ -59,7 +59,7 @@ git tag -a v0.1.0 -m "Nodens 0.1.0"
 git push origin v0.1.0
 ```
 
-The tag push runs the release job: it builds the tag, checks the version against the project declaration, uploads a source archive, and creates the GitHub Release with generated notes.
+The tag push runs the release job: it builds the tag, checks the version against the project declaration, uploads a source archive, and creates the GitHub Release. The release is titled with the bare version (`0.1.0`), and its notes are that version's `CHANGELOG.md` section followed by a link to the full change list. The job fails when the section is missing.
 
 After the release is published, retire the old line:
 
@@ -118,7 +118,7 @@ Continuous integration means integrating back to the main branch frequently, thr
 1. **Trunk and tag.** One branch, release notes written by hand. Teaches that the tag, not the branch, is the release.
 2. **Pull request checks.** Build and format gates, required in branch protection. Teaches that the trunk never goes red.
 3. **Tests in the gate.** CTest wired in, starting with the job system and the event bus. Teaches that a gate is worth its runtime.
-4. **Tag-triggered release.** Archive, generated notes, later hosted docs. Teaches provenance and reproducibility.
+4. **Tag-triggered release.** Archive, changelog notes, later hosted docs. Teaches provenance and reproducibility.
 5. **Consumer smoke test.** Build `template-nodens-app` against the released tag in CI. Teaches that the API promise is tested from outside.
 
 ## Common slips

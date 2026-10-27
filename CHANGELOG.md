@@ -4,6 +4,8 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
 ### Changed
 
 - ImPlot is fetched at `v1.1`, up from `v1.0`.

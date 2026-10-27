@@ -49,7 +49,7 @@ void PlanetaryScanLayer::AddResult(const PlanetaryScanResultEvent& e)
 static void LaunchScanJob(int id)
 {
     // Push the heavy simulation work to a background thread
-    Nodens::Application::Get().GetJobSystem().Submit(
+    Nodens::Application::Get().GetTaskSystem().Submit(
         [id]()
         {
             ZoneScopedN("PlanetaryScanJob");

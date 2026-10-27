@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Changed
+
+- The job system type is `TaskSystem`, renamed from `JobSystem`, and the accessor is `Application::GetTaskSystem()`. In the engine literature a job system drains a queue of jobs that run to completion, with coroutines or fibers for jobs that sleep and counters to join a batch (Gregory 2019, pp. 553-555), while this pool takes one callable and returns a future; see `docs/naming.md`.
+
 ## [0.1.1] - 2026-10-27
 
 ### Changed

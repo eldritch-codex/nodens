@@ -17,7 +17,7 @@ It unifies excellent third-party libraries (e.g. [ImGui](https://github.com/ocor
 - **GLFW Windows** with both OpenGL and Vulkan backends.
 - **Layer System** that governs the application lifetime and execution flow, visual rendering priority and input event routing (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Layer-System));
 - **Event System** with InputEvent routing through the LayerStack and a pub/sub thread-safe EventBus for both immediate and queued dispatch of custom event types (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Event-System));
-- **Job System** for multithreaded task execution (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Concurrency-and-JobSystem)).
+- **Task System** for multithreaded task execution (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Concurrency-and-JobSystem)).
 
 Nodens follows a **module-first architecture** where public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`.
 
@@ -60,7 +60,7 @@ Nodens includes several examples in the `examples/` directory:
 | Example | Demonstrates |
 |---------|-------------|
 | **`circularwave3d`** | Immediate mode GUI, real-time 2D/3D plotting with ImPlot and ImPlot3D |
-| **`planetaryscan`** | Pub/Sub event bus, multi-threaded job system with thread-safe data collection, live scatter plot visualization |
+| **`planetaryscan`** | Pub/Sub event bus, multi-threaded task system with thread-safe data collection, live scatter plot visualization |
 
 > 📖 For detailed walkthroughs of each example, see the **[Examples Guide](https://github.com/eldritch-codex/nodens/wiki/Examples-Guide)** on the wiki.
 

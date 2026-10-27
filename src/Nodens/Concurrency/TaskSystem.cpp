@@ -1,12 +1,12 @@
-/// @file JobSystem.cpp
-/// @brief Implementation of the JobSystem: thread spawning, shutdown, and worker loop.
+/// @file TaskSystem.cpp
+/// @brief Implementation of the TaskSystem: thread spawning, shutdown, and worker loop.
 /// @ingroup Concurrency
 
 module;
 
 #include <tracy/Tracy.hpp>
 
-module Nodens.JobSystem;
+module Nodens.TaskSystem;
 
 import Nodens.Log;
 import std;
@@ -14,7 +14,7 @@ import std;
 namespace Nodens
 {
 
-JobSystem::JobSystem()
+TaskSystem::TaskSystem()
 {
     // Calculate how many threads to spawn. We generally want to match the CPU
     // cores but leave one core free for the main thread to prevent hitching.
@@ -39,10 +39,10 @@ JobSystem::JobSystem()
             });
     }
 
-    CoreLogger().info("JobSystem initialized with {} worker threads.", threadCount);
+    CoreLogger().info("TaskSystem initialized with {} worker threads.", threadCount);
 }
 
-JobSystem::~JobSystem()
+TaskSystem::~TaskSystem()
 {
     // SHUTDOWN SEQUENCE
     // Ask all threads to stop. Ideally, they finish their current task and then
@@ -62,7 +62,7 @@ JobSystem::~JobSystem()
     // dies.
 }
 
-void JobSystem::WorkerLoop(std::stop_token stoken)
+void TaskSystem::WorkerLoop(std::stop_token stoken)
 {
     // The main loop for each worker thread. It continues as long as no stop is requested.
     while (!stoken.stop_requested())

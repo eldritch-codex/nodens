@@ -1,36 +1,36 @@
-/// @file JobSystem.cppm
-/// @brief Multithreaded job system built on C++20 jthreads with future-based task submission.
+/// @file TaskSystem.cppm
+/// @brief Multithreaded task system built on C++20 jthreads with future-based task submission.
 /// @ingroup Concurrency
 
 module;
 
 #include <tracy/Tracy.hpp>
 
-export module Nodens.JobSystem;
+export module Nodens.TaskSystem;
 
 import std;
 
 export namespace Nodens
 {
 
-/// @brief A multithreaded job system utilizing C++20 jthreads for automatic joining and
+/// @brief A multithreaded task system utilizing C++20 jthreads for automatic joining and
 /// cancellation.
 /// @details This system manages a pool of worker threads that consume tasks from a shared queue.
 /// It uses a 'future-based' approach for task submission.
-class JobSystem
+class TaskSystem
 {
 public:
-    /// @brief Initializes the JobSystem and launches worker threads.
+    /// @brief Initializes the TaskSystem and launches worker threads.
     /// @details The number of threads spawned is equal to hardware_concurrency - 1
     /// to leave the main thread free for the OS/Application loop.
-    JobSystem();
+    TaskSystem();
 
     /// @brief Destructor.
     /// @details Signals all threads to stop, wakes them up, and waits for them to join.
     /// Due to std::jthread, the joining happens automatically, but we explicitly signal stop first.
-    ~JobSystem();
+    ~TaskSystem();
 
-    /// @brief Submits a function (job) to the execution queue.
+    /// @brief Submits a function (task) to the execution queue.
     /// @tparam F The type of the function object (must be invocable with Args...).
     /// @tparam Args The types of the arguments to pass to the function.
     /// @param f The function to execute.

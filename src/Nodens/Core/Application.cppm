@@ -6,7 +6,7 @@ export module Nodens.Application;
 
 import Nodens.EventBus;
 import Nodens.InputEvents;
-import Nodens.JobSystem;
+import Nodens.TaskSystem;
 import Nodens.Layer;
 import Nodens.LayerStack;
 import Nodens.ImGuiLayer;
@@ -34,7 +34,7 @@ struct FApplicationSpecification
     EDefaultTheme DefaultTheme{EDefaultTheme::Dark};
 };
 
-/// @brief The central singleton that owns the window, layer stack, job system, and main loop.
+/// @brief The central singleton that owns the window, layer stack, task system, and main loop.
 /// @details A client application subclasses Application and pushes its own ILayer instances
 ///          in the constructor. Exactly one Application instance may exist at any time;
 ///          creating a second one terminates the process.
@@ -59,7 +59,7 @@ struct FApplicationSpecification
 class Application
 {
 public:
-    /// @brief Constructs the application, creating the window, job system, and optional ImGui
+    /// @brief Constructs the application, creating the window, task system, and optional ImGui
     /// layer.
     /// @param specification The configuration to use for initialization.
     explicit Application(const FApplicationSpecification& specification);
@@ -87,9 +87,9 @@ public:
     /// @return Reference to the IWindow instance.
     IWindow& GetWindow();
 
-    /// @brief Returns a reference to the application's job system.
-    /// @return Reference to the JobSystem instance.
-    JobSystem& GetJobSystem();
+    /// @brief Returns a reference to the application's task system.
+    /// @return Reference to the TaskSystem instance.
+    TaskSystem& GetTaskSystem();
 
     /// @brief Returns a reference to the application's event bus.
     /// @reutnr Reference to EventBus instance.
@@ -118,7 +118,7 @@ private:
     ImGuiLayer* m_ImGuiLayer{nullptr}; ///< The ImGui overlay (owned by LayerStack).
 
     std::unique_ptr<LayerStack> m_LayerStack; ///< Ordered collection of active layers.
-    std::unique_ptr<JobSystem> m_JobSystem;   ///< The multithreaded job system.
+    std::unique_ptr<TaskSystem> m_TaskSystem; ///< The multithreaded task system.
     std::unique_ptr<EventBus> m_EventBus;     ///< The event bus system.
 
     float m_LastFrameTime{0.0f}; ///< Timestamp of the previous frame (seconds since start).

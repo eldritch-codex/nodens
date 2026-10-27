@@ -150,7 +150,7 @@ set(ND_FRAMEWORK_IMPLEMENTATION_UNITS
     # Events
     src/Nodens/Events/EventBus.cpp
     # Concurrency
-    src/Nodens/Concurrency/JobSystem.cpp
+    src/Nodens/Concurrency/TaskSystem.cpp
     # ImGui
     src/Nodens/ImGui/ImGuiLayer.cpp
     src/Nodens/ImGui/DefaultTheme.cpp
@@ -174,7 +174,7 @@ set(ND_FRAMEWORK_MODULE_INTERFACES
     src/Nodens/Events/EventBus.cppm
     src/Nodens/Events/InputEvents.cppm
     # Concurrency
-    src/Nodens/Concurrency/JobSystem.cppm
+    src/Nodens/Concurrency/TaskSystem.cppm
     # ImGui
     src/Nodens/ImGui/ImGuiRenderer.cppm
     src/Nodens/ImGui/ImGuiLayer.cppm

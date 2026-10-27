@@ -40,7 +40,7 @@ Application::Application(const FApplicationSpecification& specification)
         FatalCore("Application already exists!");
     s_Instance = this;
 
-    m_JobSystem = std::make_unique<JobSystem>();
+    m_TaskSystem = std::make_unique<TaskSystem>();
     m_LayerStack = std::make_unique<LayerStack>();
     m_EventBus = std::make_unique<EventBus>();
 
@@ -111,9 +111,9 @@ IWindow& Application::GetWindow()
     return *m_Window;
 }
 
-JobSystem& Application::GetJobSystem()
+TaskSystem& Application::GetTaskSystem()
 {
-    return *m_JobSystem;
+    return *m_TaskSystem;
 }
 
 EventBus& Application::GetEventBus()

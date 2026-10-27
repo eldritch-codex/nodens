@@ -31,7 +31,7 @@ struct FApplicationSpecification
     EGraphicsAPI GraphicsAPI{
         EGraphicsAPI::Vulkan}; ///< Client graphics API for the application window.
     bool ShouldImGuiBlockInputs{true};
-    EDefaultTheme DefaultTheme{EDefaultTheme::Dark};
+    ETheme DefaultTheme{ETheme::Dark};
 };
 
 /// @brief The central singleton that owns the window, layer stack, task system, and main loop.

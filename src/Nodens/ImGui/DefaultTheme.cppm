@@ -11,7 +11,7 @@ export module Nodens.DefaultTheme;
 export namespace Nodens
 {
 
-enum class EDefaultTheme
+enum class ETheme
 {
     None, ///< Do not apply any Nodens styling (fallback to ImGui defaults).
     Dark, ///< The dark mode professional theme with teal accents.

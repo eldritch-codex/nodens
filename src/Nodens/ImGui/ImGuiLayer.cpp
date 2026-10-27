@@ -21,7 +21,7 @@ import std;
 namespace Nodens
 {
 
-ImGuiLayer::ImGuiLayer(const std::shared_ptr<ImGuiRenderer>& renderer, EDefaultTheme theme)
+ImGuiLayer::ImGuiLayer(const std::shared_ptr<ImGuiRenderer>& renderer, ETheme theme)
     : ILayer("ImGuiLayer"), m_Renderer(renderer), m_Theme(theme)
 {
 }
@@ -50,13 +50,13 @@ void ImGuiLayer::OnAttach()
 
     switch (m_Theme)
     {
-        case EDefaultTheme::Dark:
+        case ETheme::Dark:
             Nodens::ApplyDefaultDarkTheme();
             break;
-        case EDefaultTheme::Light:
+        case ETheme::Light:
             Nodens::ApplyDefaultLightTheme();
             break;
-        case EDefaultTheme::None:
+        case ETheme::None:
             ImGui::StyleColorsDark();
             break;
     }

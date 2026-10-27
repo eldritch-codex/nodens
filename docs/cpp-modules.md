@@ -20,7 +20,7 @@ Configure sets the experimental UUID that `import std` needs and switches `CMAKE
 
 The `ImGui` target is built with `CXX_MODULE_STD OFF`.
 
-A header such as `GLFW/glfw3.h` goes in the global module fragment, between `module;` and the `export module` line, as in `src/Platform/OpenGL/OpenGLContext.cppm`.
+A header such as `GLFW/glfw3.h` goes in the global module fragment, between `module;` and the `export module` line, as in `src/Platform/OpenGL/OpenGLBackend.cppm`.
 
 ## Adding a module
 

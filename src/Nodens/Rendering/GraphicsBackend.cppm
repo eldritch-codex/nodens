@@ -1,23 +1,23 @@
-/// @file GraphicsContext.cppm
-/// @brief Abstract interface for a graphics rendering context.
+/// @file GraphicsBackend.cppm
+/// @brief Abstract interface for a graphics rendering backend.
 /// @ingroup Rendering
 
-export module Nodens.GraphicsContext;
+export module Nodens.GraphicsBackend;
 
 export namespace Nodens
 {
-/// @brief Abstract base class representing a GPU rendering context.
-/// @details An IGraphicsContext encapsulates backend initialization and frame presentation
+/// @brief Abstract base class representing a GPU rendering backend.
+/// @details An IGraphicsBackend encapsulates backend initialization and frame presentation
 ///          for a specific graphics API. The concrete implementation is created by the
 ///          platform window or an external renderer during initialization.
 ///          A Vulkan implementation may own its instance, device, swapchain, and
 ///          synchronization without exposing Vulkan types through this interface.
-/// @see OpenGLContext, IWindow
+/// @see OpenGLBackend, IWindow
 /// @ingroup Rendering
-class IGraphicsContext
+class IGraphicsBackend
 {
 public:
-    virtual ~IGraphicsContext() = default;
+    virtual ~IGraphicsBackend() = default;
 
     /// @brief Initializes backend state and resources.
     virtual void Init() = 0;

@@ -1,5 +1,5 @@
-/// @file VulkanContext.cppm
-/// @brief Nodens-owned Vulkan instance, device, surface, and swapchain context.
+/// @file VulkanBackend.cppm
+/// @brief Nodens-owned Vulkan instance, device, surface, and swapchain backend.
 /// @details Nodens owns loader, instance, surface, physical-device selection,
 ///          logical-device creation, and swapchain resources. Frame scheduling
 ///          follows later.
@@ -9,36 +9,36 @@ module;
 
 #include <GLFW/glfw3.h>
 
-export module Nodens.VulkanContext;
+export module Nodens.VulkanBackend;
 
-import Nodens.GraphicsContext;
+import Nodens.GraphicsBackend;
 import std;
 export import vulkan;
 
 namespace Nodens
 {
 /// @brief Opaque owner of the per-frame Tracy Vulkan profiling contexts.
-/// @details Defined in VulkanContext.cpp so Tracy headers stay out of this module.
+/// @details Defined in VulkanBackend.cpp so Tracy headers stay out of this module.
 struct GpuProfilerState;
 } // namespace Nodens
 
 export namespace Nodens
 {
-/// @brief Vulkan context shared by Nodens and an attached renderer.
+/// @brief Vulkan backend shared by Nodens and an attached renderer.
 /// @details Nodens owns Vulkan platform and swapchain resources. Consumers borrow
-///          these handles and must not destroy them. The context requires a GLFW window
+///          these handles and must not destroy them. The backend requires a GLFW window
 ///          created with `GLFW_NO_API`.
 /// @ingroup Platform
-class VulkanContext : public IGraphicsContext
+class VulkanBackend : public IGraphicsBackend
 {
 public:
     static constexpr uint32_t FramesInFlight{2};
 
-    /// @brief Constructs a Vulkan context for an existing GLFW window.
+    /// @brief Constructs a Vulkan backend for an existing GLFW window.
     /// @param windowHandle A valid GLFW window created without a client API.
-    explicit VulkanContext(GLFWwindow* windowHandle);
+    explicit VulkanBackend(GLFWwindow* windowHandle);
 
-    ~VulkanContext() override;
+    ~VulkanBackend() override;
 
     /// @brief Creates the Vulkan instance, surface, physical device, and logical device.
     void Init() override;
@@ -131,17 +131,17 @@ public:
     uint32_t GetCurrentImageIndex() const;
 
 private:
-    /// @brief Creates the Vulkan instance for the context.
+    /// @brief Creates the Vulkan instance for the backend.
     void CreateInstance();
 
-    /// @brief Returns the required instance layers for the Vulkan context.
+    /// @brief Returns the required instance layers for the Vulkan backend.
     /// @details For now the only required layers are validation layers, enabled only in debug mode.
     std::vector<const char*> GetRequiredInstanceLayers() const;
 
-    /// @brief Returns the required instance extensions for the Vulkan context.
+    /// @brief Returns the required instance extensions for the Vulkan backend.
     std::vector<const char*> GetRequiredInstanceExtensions() const;
 
-    /// @brief Sets up the debug messenger for the Vulkan context.
+    /// @brief Sets up the debug messenger for the Vulkan backend.
     void SetupDebugMessenger();
 
     /// @brief Creates the Vulkan surface for the window.

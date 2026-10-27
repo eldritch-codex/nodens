@@ -1,10 +1,10 @@
-<!-- covers: src/Nodens/Concurrency/, src/Nodens/Core/Application.cppm -->
+<!-- covers: src/Nodens/Concurrency/, src/Nodens/Core/Application.cppm, src/Nodens/Rendering/, src/Platform/ -->
 
 # Type names
 
 Nodens names a type for its role, and the kind marker says what kind of declaration it is: `I` for an interface, `F` for a plain data struct, `E` for an enumeration. A rename changes the word inside the marker, never the marker itself.
 
-The implementation carries the platform word and the interface keeps the role word, as with `IWindow` and `GlfwWindow`.
+The implementation carries the platform word and the interface keeps the role word: `IWindow` with `GlfwWindow`, and `IGraphicsBackend` with `OpenGLBackend` or `VulkanBackend`.
 
 ## Why the thread pool is `TaskSystem`
 

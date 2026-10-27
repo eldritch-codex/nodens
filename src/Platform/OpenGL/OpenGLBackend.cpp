@@ -1,5 +1,5 @@
-/// @file OpenGLContext.cpp
-/// @brief Implementation of OpenGLContext: GLAD initialization, GL state setup, and buffer swap.
+/// @file OpenGLBackend.cpp
+/// @brief Implementation of OpenGLBackend: GLAD initialization, GL state setup, and buffer swap.
 /// @ingroup Platform
 
 module;
@@ -7,22 +7,20 @@ module;
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-module Nodens.OpenGLContext;
-
-import Nodens.Log;
+module Nodens.OpenGLBackend;
 
 import Nodens.Log;
 
 namespace Nodens
 {
 
-OpenGLContext::OpenGLContext(GLFWwindow* windowHandle) : m_WindowHandle(windowHandle)
+OpenGLBackend::OpenGLBackend(GLFWwindow* windowHandle) : m_WindowHandle(windowHandle)
 {
     if (!windowHandle)
         FatalCore("Window handle is null!");
 }
 
-void OpenGLContext::Init()
+void OpenGLBackend::Init()
 {
     glfwMakeContextCurrent(m_WindowHandle);
     // glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -43,7 +41,7 @@ void OpenGLContext::Init()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void OpenGLContext::Present()
+void OpenGLBackend::Present()
 {
     glfwSwapBuffers(m_WindowHandle);
 }

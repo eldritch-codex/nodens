@@ -31,7 +31,7 @@ export import Nodens.Application;
 export import Nodens.Event;
 export import Nodens.EventBus;
 export import Nodens.InputEvents;
-export import Nodens.GraphicsContext;
+export import Nodens.GraphicsBackend;
 export import Nodens.ImGuiLayer;
 export import Nodens.ImGuiRenderer;
 export import Nodens.Input;

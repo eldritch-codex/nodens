@@ -1,5 +1,5 @@
-/// @file VulkanContext.cpp
-/// @brief Implementation of Nodens' Vulkan context.
+/// @file VulkanBackend.cpp
+/// @brief Implementation of Nodens' Vulkan backend.
 /// @ingroup Platform
 
 module;
@@ -9,7 +9,7 @@ module;
 #include <cassert>
 #include <tracy/TracyVulkan.hpp>
 
-module Nodens.VulkanContext;
+module Nodens.VulkanBackend;
 
 import Nodens.Log;
 import std;
@@ -20,16 +20,16 @@ namespace Nodens
 /// @brief Per-frame Tracy Vulkan contexts. One per frame-in-flight command buffer.
 struct GpuProfilerState
 {
-    std::array<TracyVkCtx, VulkanContext::FramesInFlight> Contexts{};
+    std::array<TracyVkCtx, VulkanBackend::FramesInFlight> Contexts{};
 };
 
-VulkanContext::VulkanContext(GLFWwindow* windowHandle) : m_WindowHandle(windowHandle)
+VulkanBackend::VulkanBackend(GLFWwindow* windowHandle) : m_WindowHandle(windowHandle)
 {
     if (!m_WindowHandle)
-        throw std::invalid_argument{"VulkanContext requires a valid GLFW window"};
+        throw std::invalid_argument{"VulkanBackend requires a valid GLFW window"};
 }
 
-VulkanContext::~VulkanContext()
+VulkanBackend::~VulkanBackend()
 {
     if (!m_GpuProfiler)
         return;
@@ -38,7 +38,7 @@ VulkanContext::~VulkanContext()
         TracyVkDestroy(context);
 }
 
-void VulkanContext::Init()
+void VulkanBackend::Init()
 {
     CreateInstance();
 #if defined(ND_DEBUG)
@@ -55,7 +55,7 @@ void VulkanContext::Init()
 #endif
 }
 
-void VulkanContext::CreateInstance()
+void VulkanBackend::CreateInstance()
 {
     if (*m_Instance)
         return;
@@ -82,7 +82,7 @@ void VulkanContext::CreateInstance()
     m_Instance = vk::raii::Instance{m_Context, instanceCreateInfo};
 }
 
-std::vector<const char*> VulkanContext::GetRequiredInstanceLayers() const
+std::vector<const char*> VulkanBackend::GetRequiredInstanceLayers() const
 {
     std::vector<const char*> layers{};
 #if defined(ND_DEBUG)
@@ -101,7 +101,7 @@ std::vector<const char*> VulkanContext::GetRequiredInstanceLayers() const
     return layers;
 }
 
-std::vector<const char*> VulkanContext::GetRequiredInstanceExtensions() const
+std::vector<const char*> VulkanBackend::GetRequiredInstanceExtensions() const
 {
     uint32_t glfwExtensionsCount{0};
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
@@ -141,7 +141,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSeverityFlagBi
     return VK_FALSE;
 }
 
-void VulkanContext::SetupDebugMessenger()
+void VulkanBackend::SetupDebugMessenger()
 {
     m_DebugMessenger = m_Instance.createDebugUtilsMessengerEXT({
         .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
@@ -153,7 +153,7 @@ void VulkanContext::SetupDebugMessenger()
     });
 }
 
-void VulkanContext::CreateSurface()
+void VulkanBackend::CreateSurface()
 {
     VkSurfaceKHR rawSurface{VK_NULL_HANDLE};
     if (glfwCreateWindowSurface(*m_Instance, m_WindowHandle, nullptr, &rawSurface) != VK_SUCCESS)
@@ -161,7 +161,7 @@ void VulkanContext::CreateSurface()
     m_Surface = vk::raii::SurfaceKHR{m_Instance, rawSurface};
 }
 
-void VulkanContext::PickPhysicalDevice()
+void VulkanBackend::PickPhysicalDevice()
 {
     const auto availablePhysicalDevices = m_Instance.enumeratePhysicalDevices();
     const auto deviceIterator = std::ranges::find_if(
@@ -183,7 +183,7 @@ void VulkanContext::PickPhysicalDevice()
     CoreLogger().info("  Driver Version: {}", properties.driverVersion);
 }
 
-bool VulkanContext::IsDeviceSuitable(const vk::raii::PhysicalDevice& physicalDevice) const
+bool VulkanBackend::IsDeviceSuitable(const vk::raii::PhysicalDevice& physicalDevice) const
 {
     if (physicalDevice.getProperties().apiVersion < vk::ApiVersion13)
         return false;
@@ -239,7 +239,7 @@ bool VulkanContext::IsDeviceSuitable(const vk::raii::PhysicalDevice& physicalDev
                .extendedDynamicState;
 }
 
-void VulkanContext::CreateLogicalDevice()
+void VulkanBackend::CreateLogicalDevice()
 {
     const auto queueFamilies = m_PhysicalDevice.getQueueFamilyProperties();
     const auto queueIterator = std::ranges::find_if(
@@ -299,7 +299,7 @@ void VulkanContext::CreateLogicalDevice()
     m_GraphicsQueue = vk::raii::Queue{m_Device, m_GraphicsQueueFamilyIndex, 0};
 }
 
-void VulkanContext::CreateSwapchain()
+void VulkanBackend::CreateSwapchain()
 {
     const auto capabilities = m_PhysicalDevice.getSurfaceCapabilitiesKHR(*m_Surface);
     m_SwapchainExtent = ChooseSwapchainExtent(capabilities);
@@ -345,7 +345,7 @@ void VulkanContext::CreateSwapchain()
 }
 
 vk::Extent2D
-VulkanContext::ChooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& capabilities) const
+VulkanBackend::ChooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& capabilities) const
 {
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
         return capabilities.currentExtent;
@@ -359,7 +359,7 @@ VulkanContext::ChooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& capabilit
                 height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height)};
 }
 
-vk::SurfaceFormatKHR VulkanContext::ChooseSwapchainSurfaceFormat(
+vk::SurfaceFormatKHR VulkanBackend::ChooseSwapchainSurfaceFormat(
     const std::vector<vk::SurfaceFormatKHR>& availableFormats) const
 {
     assert(!availableFormats.empty());
@@ -374,7 +374,7 @@ vk::SurfaceFormatKHR VulkanContext::ChooseSwapchainSurfaceFormat(
 }
 
 uint32_t
-VulkanContext::ChooseSwapchainImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) const
+VulkanBackend::ChooseSwapchainImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) const
 {
     auto imageCount = std::max(3u, capabilities.minImageCount);
     if (capabilities.maxImageCount != 0 && capabilities.maxImageCount < imageCount)
@@ -382,7 +382,7 @@ VulkanContext::ChooseSwapchainImageCount(const vk::SurfaceCapabilitiesKHR& capab
     return imageCount;
 }
 
-vk::PresentModeKHR VulkanContext::ChooseSwapchainPresentMode(
+vk::PresentModeKHR VulkanBackend::ChooseSwapchainPresentMode(
     const std::vector<vk::PresentModeKHR>& availablePresentModes) const
 {
     assert(std::ranges::any_of(availablePresentModes,
@@ -395,7 +395,7 @@ vk::PresentModeKHR VulkanContext::ChooseSwapchainPresentMode(
                : vk::PresentModeKHR::eFifo;
 }
 
-void VulkanContext::CreateCommandResources()
+void VulkanBackend::CreateCommandResources()
 {
     const vk::CommandPoolCreateInfo poolCreateInfo{
         .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -411,7 +411,7 @@ void VulkanContext::CreateCommandResources()
     m_CommandBuffers = vk::raii::CommandBuffers{m_Device, allocateInfo};
 }
 
-void VulkanContext::CreateFrameSynchronization()
+void VulkanBackend::CreateFrameSynchronization()
 {
     CreateRenderFinishedSemaphores();
     for (uint32_t index = 0; index < FramesInFlight; ++index)
@@ -422,18 +422,18 @@ void VulkanContext::CreateFrameSynchronization()
     }
 }
 
-void VulkanContext::CreateRenderFinishedSemaphores()
+void VulkanBackend::CreateRenderFinishedSemaphores()
 {
     m_RenderFinishedSemaphores.clear();
     for (size_t index = 0; index < m_SwapchainImages.size(); ++index)
         m_RenderFinishedSemaphores.emplace_back(m_Device, vk::SemaphoreCreateInfo{});
 }
 
-void VulkanContext::InitializeGpuProfilerState()
+void VulkanBackend::InitializeGpuProfilerState()
 {
     // Initialize GPU profiler state.
     m_GpuProfiler = std::make_unique<GpuProfilerState>();
-    for (uint32_t index = 0; index < VulkanContext::FramesInFlight; ++index)
+    for (uint32_t index = 0; index < VulkanBackend::FramesInFlight; ++index)
     {
         m_GpuProfiler->Contexts[index] = TracyVkContextCalibrated(
             *m_PhysicalDevice,
@@ -445,7 +445,7 @@ void VulkanContext::InitializeGpuProfilerState()
     }
 }
 
-std::optional<uint32_t> VulkanContext::BeginFrame()
+std::optional<uint32_t> VulkanBackend::BeginFrame()
 {
     int framebufferWidth{0};
     int framebufferHeight{0};
@@ -494,7 +494,7 @@ std::optional<uint32_t> VulkanContext::BeginFrame()
     return imageIndex;
 }
 
-void VulkanContext::TransitionActiveImageToColorAttachment()
+void VulkanBackend::TransitionActiveImageToColorAttachment()
 {
     const vk::ImageMemoryBarrier2 barrier{
         .srcStageMask = vk::PipelineStageFlagBits2::eBottomOfPipe,
@@ -519,17 +519,17 @@ void VulkanContext::TransitionActiveImageToColorAttachment()
     m_SwapchainImageLayouts[m_CurrentImageIndex] = vk::ImageLayout::eColorAttachmentOptimal;
 }
 
-bool VulkanContext::IsFrameActive() const
+bool VulkanBackend::IsFrameActive() const
 {
     return m_FrameStarted;
 }
 
-const vk::raii::CommandBuffer& VulkanContext::GetActiveCommandBuffer() const
+const vk::raii::CommandBuffer& VulkanBackend::GetActiveCommandBuffer() const
 {
     return m_CommandBuffers[m_CurrentFrameIndex];
 }
 
-void VulkanContext::TransitionActiveImageToPresent()
+void VulkanBackend::TransitionActiveImageToPresent()
 {
     const vk::ImageMemoryBarrier2 barrier{
         .srcStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
@@ -553,7 +553,7 @@ void VulkanContext::TransitionActiveImageToPresent()
     m_SwapchainImageLayouts[m_CurrentImageIndex] = vk::ImageLayout::ePresentSrcKHR;
 }
 
-void VulkanContext::Present()
+void VulkanBackend::Present()
 {
     if (!m_FrameStarted)
         return;
@@ -593,7 +593,7 @@ void VulkanContext::Present()
         m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % FramesInFlight;
 }
 
-void VulkanContext::RecreateSwapchain()
+void VulkanBackend::RecreateSwapchain()
 {
     m_Device.waitIdle();
     m_SwapchainImageViews.clear();
@@ -603,94 +603,94 @@ void VulkanContext::RecreateSwapchain()
     CreateRenderFinishedSemaphores();
 }
 
-void VulkanContext::WaitIdle() const
+void VulkanBackend::WaitIdle() const
 {
     m_Device.waitIdle();
 }
 
-void* VulkanContext::GetGpuProfilerContext(uint32_t frameIndex) const
+void* VulkanBackend::GetGpuProfilerContext(uint32_t frameIndex) const
 {
-    if (!m_GpuProfiler || frameIndex >= VulkanContext::FramesInFlight)
+    if (!m_GpuProfiler || frameIndex >= VulkanBackend::FramesInFlight)
         return nullptr;
     return m_GpuProfiler->Contexts[frameIndex];
 }
 
-vk::Instance VulkanContext::GetInstance() const
+vk::Instance VulkanBackend::GetInstance() const
 {
     return *m_Instance;
 }
 
-vk::SurfaceKHR VulkanContext::GetSurface() const
+vk::SurfaceKHR VulkanBackend::GetSurface() const
 {
     return *m_Surface;
 }
 
-const vk::raii::Instance& VulkanContext::GetInstanceRAII() const
+const vk::raii::Instance& VulkanBackend::GetInstanceRAII() const
 {
     return m_Instance;
 }
 
-const vk::raii::SurfaceKHR& VulkanContext::GetSurfaceRAII() const
+const vk::raii::SurfaceKHR& VulkanBackend::GetSurfaceRAII() const
 {
     return m_Surface;
 }
 
-const vk::raii::PhysicalDevice& VulkanContext::GetPhysicalDevice() const
+const vk::raii::PhysicalDevice& VulkanBackend::GetPhysicalDevice() const
 {
     return m_PhysicalDevice;
 }
 
-const vk::raii::Device& VulkanContext::GetDeviceRAII() const
+const vk::raii::Device& VulkanBackend::GetDeviceRAII() const
 {
     return m_Device;
 }
 
-const vk::raii::Queue& VulkanContext::GetGraphicsQueueRAII() const
+const vk::raii::Queue& VulkanBackend::GetGraphicsQueueRAII() const
 {
     return m_GraphicsQueue;
 }
 
-uint32_t VulkanContext::GetGraphicsQueueFamilyIndex() const
+uint32_t VulkanBackend::GetGraphicsQueueFamilyIndex() const
 {
     return m_GraphicsQueueFamilyIndex;
 }
 
-const vk::raii::SwapchainKHR& VulkanContext::GetSwapchainRAII() const
+const vk::raii::SwapchainKHR& VulkanBackend::GetSwapchainRAII() const
 {
     return m_Swapchain;
 }
 
-const std::vector<vk::Image>& VulkanContext::GetSwapchainImages() const
+const std::vector<vk::Image>& VulkanBackend::GetSwapchainImages() const
 {
     return m_SwapchainImages;
 }
 
-const std::vector<vk::raii::ImageView>& VulkanContext::GetSwapchainImageViews() const
+const std::vector<vk::raii::ImageView>& VulkanBackend::GetSwapchainImageViews() const
 {
     return m_SwapchainImageViews;
 }
 
-vk::Extent2D VulkanContext::GetSwapchainExtent() const
+vk::Extent2D VulkanBackend::GetSwapchainExtent() const
 {
     return m_SwapchainExtent;
 }
 
-vk::SurfaceFormatKHR VulkanContext::GetSwapchainSurfaceFormat() const
+vk::SurfaceFormatKHR VulkanBackend::GetSwapchainSurfaceFormat() const
 {
     return m_SwapchainSurfaceFormat;
 }
 
-uint32_t VulkanContext::GetFramesInFlight() const
+uint32_t VulkanBackend::GetFramesInFlight() const
 {
     return FramesInFlight;
 }
 
-uint32_t VulkanContext::GetCurrentFrameIndex() const
+uint32_t VulkanBackend::GetCurrentFrameIndex() const
 {
     return m_CurrentFrameIndex;
 }
 
-uint32_t VulkanContext::GetCurrentImageIndex() const
+uint32_t VulkanBackend::GetCurrentImageIndex() const
 {
     return m_CurrentImageIndex;
 }

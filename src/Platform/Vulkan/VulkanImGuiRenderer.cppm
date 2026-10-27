@@ -12,21 +12,21 @@ module;
 export module Nodens.VulkanImGuiRenderer;
 
 import Nodens.ImGuiRenderer;
-import Nodens.VulkanContext;
+import Nodens.VulkanBackend;
 
 export namespace Nodens
 {
 /// @brief Concrete ImGuiRenderer implementation using Dear ImGui's Vulkan backend.
-/// @details Borrows all Vulkan objects from VulkanContext. The renderer does not own
+/// @details Borrows all Vulkan objects from VulkanBackend. The renderer does not own
 ///          the instance, device, queue, swapchain, or command buffers.
-/// @see ImGuiRenderer, VulkanContext, ImGuiLayer
+/// @see ImGuiRenderer, VulkanBackend, ImGuiLayer
 /// @ingroup Platform
 class VulkanImGuiRenderer : public ImGuiRenderer
 {
 public:
     /// @brief Constructs a renderer that borrows a Nodens Vulkan context.
     /// @param context Nodens-owned Vulkan context with an initialized swapchain.
-    explicit VulkanImGuiRenderer(VulkanContext& context) : m_Context(context)
+    explicit VulkanImGuiRenderer(VulkanBackend& context) : m_Context(context)
     {
     }
 
@@ -47,6 +47,6 @@ public:
     void RenderDrawData(ImDrawData* drawData) override;
 
 private:
-    VulkanContext& m_Context;
+    VulkanBackend& m_Context;
 };
 } // namespace Nodens

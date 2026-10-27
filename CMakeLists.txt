@@ -84,11 +84,11 @@ set(ND_OPENGL_MODULES)
 set(ND_OPENGL_IMPLEMENTATION_UNITS)
 if(ND_ENABLE_OPENGL)
     list(APPEND ND_OPENGL_MODULES
-        src/Platform/OpenGL/OpenGLContext.cppm
+        src/Platform/OpenGL/OpenGLBackend.cppm
         src/Platform/OpenGL/OpenGLImGuiRenderer.cppm
     )
     list(APPEND ND_OPENGL_IMPLEMENTATION_UNITS
-        src/Platform/OpenGL/OpenGLContext.cpp
+        src/Platform/OpenGL/OpenGLBackend.cpp
         src/Platform/OpenGL/OpenGLImGuiRenderer.cpp
     )
 endif()
@@ -129,11 +129,11 @@ if(ND_ENABLE_VULKAN AND Vulkan_FOUND)
     endif()
 
     list(APPEND ND_VULKAN_MODULES
-        src/Platform/Vulkan/VulkanContext.cppm
+        src/Platform/Vulkan/VulkanBackend.cppm
         src/Platform/Vulkan/VulkanImGuiRenderer.cppm
     )
     list(APPEND ND_VULKAN_IMPLEMENTATION_UNITS
-        src/Platform/Vulkan/VulkanContext.cpp
+        src/Platform/Vulkan/VulkanBackend.cpp
         src/Platform/Vulkan/VulkanImGuiRenderer.cpp
     )
 endif()
@@ -184,7 +184,7 @@ set(ND_FRAMEWORK_MODULE_INTERFACES
     src/Nodens/Input/KeyCodes.cppm
     src/Nodens/Input/MouseButtonCodes.cppm
     # Rendering
-    src/Nodens/Rendering/GraphicsContext.cppm
+    src/Nodens/Rendering/GraphicsBackend.cppm
     src/Nodens/Rendering/Window.cppm
     # Platform
     ${ND_OPENGL_MODULES}

@@ -20,7 +20,7 @@ import Nodens.ImGuiLayer;
 import Nodens.OpenGLImGuiRenderer;
 #endif
 #if defined(ND_HAS_VULKAN)
-import Nodens.VulkanContext;
+import Nodens.VulkanBackend;
 import Nodens.VulkanImGuiRenderer;
 #endif
 import std;
@@ -70,7 +70,7 @@ Application::Application(const FApplicationSpecification& specification)
         {
             // Borrow the window's initialized context; the ImGui backend must not create a second
             // device.
-            auto* context = dynamic_cast<VulkanContext*>(m_Window->GetGraphicsContext());
+            auto* context = dynamic_cast<VulkanBackend*>(m_Window->GetGraphicsContext());
             if (!context)
                 FatalCore("Vulkan window has no Vulkan graphics context!");
             imguiRenderer = std::make_shared<VulkanImGuiRenderer>(*context);
@@ -151,7 +151,7 @@ void Application::Run()
         if (m_Specification.GraphicsAPI == EGraphicsAPI::Vulkan)
         {
             // Acquire once before layers run so Nyar and ImGui append to the same command buffer.
-            auto* context = dynamic_cast<VulkanContext*>(m_Window->GetGraphicsContext());
+            auto* context = dynamic_cast<VulkanBackend*>(m_Window->GetGraphicsContext());
             if (!context)
                 FatalCore("Vulkan window has no Vulkan graphics context!");
             context->BeginFrame();

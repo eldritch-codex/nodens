@@ -1,29 +1,29 @@
-/// @file OpenGLContext.cppm
-/// @brief OpenGL implementation of the IGraphicsContext interface.
+/// @file OpenGLBackend.cppm
+/// @brief OpenGL implementation of the IGraphicsBackend interface.
 /// @ingroup Platform
 
 module;
 
 #include <GLFW/glfw3.h>
 
-export module Nodens.OpenGLContext;
+export module Nodens.OpenGLBackend;
 
-import Nodens.GraphicsContext;
+import Nodens.GraphicsBackend;
 
 export namespace Nodens
 {
-/// @brief Concrete IGraphicsContext implementation for OpenGL via GLFW.
+/// @brief Concrete IGraphicsBackend implementation for OpenGL via GLFW.
 /// @details Creates an OpenGL rendering context on the provided GLFW window, loads
 ///          function pointers with GLAD, enables default GL state (multisample,
 ///          depth test, face culling, alpha blending), and handles buffer swapping.
-/// @see IGraphicsContext, GlfwWindow
+/// @see IGraphicsBackend, GlfwWindow
 /// @ingroup Platform
-class OpenGLContext : public IGraphicsContext
+class OpenGLBackend : public IGraphicsBackend
 {
 public:
     /// @brief Constructs the OpenGL context for a given GLFW window.
     /// @param windowHandle A valid GLFWwindow pointer. Must not be null.
-    OpenGLContext(GLFWwindow* windowHandle);
+    OpenGLBackend(GLFWwindow* windowHandle);
 
     /// @brief Makes the context current, loads GL functions via GLAD, and sets default GL state.
     void Init() override;

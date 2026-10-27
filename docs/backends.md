@@ -1,7 +1,7 @@
 <!-- covers: CMakeLists.txt, src/Nodens/Rendering/, src/Nodens/ImGui/, src/Nodens/Core/Application.cpp, src/Platform/ -->
 # Graphics backends
 
-Nodens puts its graphics API behind two interfaces: `IGraphicsContext` (`src/Nodens/Rendering/GraphicsContext.cppm`) for the rendering context, and `ImGuiRenderer` (`src/Nodens/ImGui/ImGuiRenderer.cppm`) for ImGui's draw data. Each backend under `src/Platform/` implements both.
+Nodens puts its graphics API behind two interfaces: `IGraphicsBackend` (`src/Nodens/Rendering/GraphicsBackend.cppm`) for the rendering backend, and `ImGuiRenderer` (`src/Nodens/ImGui/ImGuiRenderer.cppm`) for ImGui's draw data. Each backend under `src/Platform/` implements both.
 
 ## Choosing a backend
 
@@ -15,9 +15,9 @@ Nodens puts its graphics API behind two interfaces: `IGraphicsContext` (`src/Nod
 - When `ND_HAS_VULKAN` is defined and it asks for Vulkan, it creates a `VulkanImGuiRenderer`.
 - When neither branch created one, `FatalCore` reports that the ImGui renderer is not available for this graphics API.
 
-## Context ownership
+## Backend ownership
 
-`OpenGLContext::Init` makes the context current, loads the GL function pointers through GLAD and sets the default GL state.
+`OpenGLBackend::Init` makes the context current, loads the GL function pointers through GLAD and sets the default GL state.
 
 ## Build switches
 

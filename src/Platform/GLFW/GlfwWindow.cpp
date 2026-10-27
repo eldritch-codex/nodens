@@ -12,13 +12,13 @@ module;
 
 module Nodens.Window;
 
-import Nodens.GraphicsContext;
+import Nodens.GraphicsBackend;
 import Nodens.Log;
 #if defined(ND_HAS_OPENGL)
-import Nodens.OpenGLContext;
+import Nodens.OpenGLBackend;
 #endif
 #if defined(ND_HAS_VULKAN)
-import Nodens.VulkanContext;
+import Nodens.VulkanBackend;
 #endif
 import std;
 
@@ -26,7 +26,7 @@ namespace Nodens
 {
 
 /// @brief Concrete GLFW-backed Window implementation.
-/// @details Owns the GLFWwindow handle, an optional OpenGLContext, and a WindowData
+/// @details Owns the GLFWwindow handle, an optional OpenGLBackend, and a WindowData
 ///          struct that stores dimensions, VSync state, and the event callback. GLFW callbacks are
 ///          registered during Init() and dispatch Nodens Event objects to the application.
 /// @ingroup Platform
@@ -101,7 +101,7 @@ public:
 
     /// @brief Returns the graphics context owned by this window.
     /// @return Borrowed graphics context, or null when no context exists.
-    IGraphicsContext* GetGraphicsContext() const override
+    IGraphicsBackend* GetGraphicsContext() const override
     {
         return m_Context;
     }
@@ -115,7 +115,7 @@ private:
     void Shutdown();
 
     GLFWwindow* m_Window = nullptr;        ///< The native GLFW window handle.
-    IGraphicsContext* m_Context = nullptr; ///< The backend context bound to this window.
+    IGraphicsBackend* m_Context = nullptr; ///< The backend bound to this window.
 
     /// @brief Internal data bundle attached to the GLFW window via glfwSetWindowUserPointer.
     /// @details GLFW callbacks retrieve this struct to dispatch Nodens events and update
@@ -196,7 +196,7 @@ void GlfwWindow::Init(const FWindowProps& props)
     if (props.API == EGraphicsAPI::OpenGL)
     {
 #if defined(ND_HAS_OPENGL)
-        m_Context = new OpenGLContext(m_Window);
+        m_Context = new OpenGLBackend(m_Window);
 #else
         FatalCore("Nodens was built without OpenGL support!");
 #endif
@@ -204,7 +204,7 @@ void GlfwWindow::Init(const FWindowProps& props)
     else if (props.API == EGraphicsAPI::Vulkan)
     {
 #if defined(ND_HAS_VULKAN)
-        m_Context = new VulkanContext(m_Window);
+        m_Context = new VulkanBackend(m_Window);
 #else
         FatalCore("Nodens was built without Vulkan support!");
 #endif

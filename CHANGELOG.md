@@ -9,9 +9,13 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 ### Changed
 
 - ImPlot is fetched at `v1.1`, up from `v1.0`.
+- The dev container has one configuration per GPU type, `.devcontainer/nvidia` and `.devcontainer/dri`, instead of a single file edited by hand. `docker.sh` picks one, and `NODENS_GPU` overrides it.
+- The shared Zed tasks and debug scenarios are tracked in the repository, and they run from the project root even when the Zed workspace is a parent folder.
 
 ### Fixed
 
+- Configuring without the Vulkan SDK prints a warning. Before, the build was silently OpenGL-only and exited at startup under the default Vulkan API.
+- The `circularwave3d` example advances by the frame time, so the curve no longer scrolls faster at a higher frame rate.
 - GLFW is fetched at its pinned tag. It was declared but never made available, so the build linked the system copy.
 - `ND_BUILD_EXAMPLES` defaults to off when Nodens is consumed by another project. The default was on, because the second `option()` call was a no-op.
 - The `MouseButtonReleased` event has a name. It was empty, so the event logged as an empty string and the file failed to compile with GCC.

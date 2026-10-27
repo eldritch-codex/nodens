@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
-project(Nodens VERSION 0.2.0 LANGUAGES CXX)
+project(Nodens VERSION 0.2.1 LANGUAGES CXX)
 
 # -----------------------------------------------------------------------------
 # Core Build Settings

@@ -4,6 +4,8 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-27
+
 ### Added
 
 - `scripts/check.sh` runs the format check on the changed C++ files and a Debug build in `build/check`, in the dev container. It is the check to run before a direct commit that touches C++ or the build.

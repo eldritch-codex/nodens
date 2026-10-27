@@ -31,9 +31,9 @@ option(ND_ENABLE_VULKAN "Build the Vulkan backend when Vulkan is available" ON)
 # The examples are on in Nodens' own build and off when another project consumes it. The default
 # is chosen before the one option() call: a second call for the same name would be a no-op.
 if(PROJECT_IS_TOP_LEVEL)
-  option(ND_BUILD_EXAMPLES "Build the Nodens example applications" ON)
+    option(ND_BUILD_EXAMPLES "Build the Nodens example applications" ON)
 else()
-  option(ND_BUILD_EXAMPLES "Build the Nodens example applications" OFF)
+    option(ND_BUILD_EXAMPLES "Build the Nodens example applications" OFF)
 endif()
 option(ND_BUILD_TRACY_PROFILER
   "Build the Tracy Profiler GUI from Tracy source" OFF)
@@ -44,13 +44,13 @@ option(ND_BUILD_TRACY_PROFILER
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(ND_ENABLE_OPENGL)
-  add_subdirectory(vendor/glad)
+    add_subdirectory(vendor/glad)
 endif()
 include(NodensDependencies)
 
 if(ND_BUILD_TRACY_PROFILER)
-  include(ExternalProject)
-  ExternalProject_Add(tracy-profiler
+    include(ExternalProject)
+    ExternalProject_Add(tracy-profiler
     SOURCE_DIR "${Tracy_SOURCE_DIR}/profiler"
     BINARY_DIR "${Tracy_BINARY_DIR}/tracy-profiler"
     CMAKE_ARGS
@@ -64,30 +64,30 @@ if(ND_BUILD_TRACY_PROFILER)
 endif()
 
 if(ND_ENABLE_VULKAN)
-  find_package(Vulkan QUIET)
-  if(NOT Vulkan_FOUND)
-    message(WARNING "ND_ENABLE_VULKAN is ON but the Vulkan SDK was not found, so Nodens is built without the Vulkan backend. "
+    find_package(Vulkan QUIET)
+    if(NOT Vulkan_FOUND)
+        message(WARNING "ND_ENABLE_VULKAN is ON but the Vulkan SDK was not found, so Nodens is built without the Vulkan backend. "
                     "Applications that use the default GraphicsAPI (Vulkan) will exit at startup. "
                     "Install the Vulkan development files, or set -DND_ENABLE_VULKAN=OFF and use OpenGL.")
-  endif()
+    endif()
 endif()
 include(NodensImGui)
 
 if(ND_ENABLE_VULKAN AND Vulkan_FOUND)
-  target_sources(ImGui PRIVATE
+    target_sources(ImGui PRIVATE
         "${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp"
     )
-  target_link_libraries(ImGui PUBLIC Vulkan::Vulkan)
+    target_link_libraries(ImGui PUBLIC Vulkan::Vulkan)
 endif()
 
 set(ND_OPENGL_MODULES)
 set(ND_OPENGL_IMPLEMENTATION_UNITS)
 if(ND_ENABLE_OPENGL)
-  list(APPEND ND_OPENGL_MODULES
+    list(APPEND ND_OPENGL_MODULES
         src/Platform/OpenGL/OpenGLContext.cppm
         src/Platform/OpenGL/OpenGLImGuiRenderer.cppm
     )
-  list(APPEND ND_OPENGL_IMPLEMENTATION_UNITS
+    list(APPEND ND_OPENGL_IMPLEMENTATION_UNITS
         src/Platform/OpenGL/OpenGLContext.cpp
         src/Platform/OpenGL/OpenGLImGuiRenderer.cpp
     )
@@ -97,42 +97,42 @@ set(ND_VULKAN_MODULES)
 # Dear ImGui's Vulkan backend has a conventional implementation unit alongside its module.
 set(ND_VULKAN_IMPLEMENTATION_UNITS)
 if(ND_ENABLE_VULKAN AND Vulkan_FOUND)
-  if(NOT TARGET Vulkan::cppm)
-    add_library(NodensVulkanCppModule STATIC)
-    add_library(Vulkan::cppm ALIAS NodensVulkanCppModule)
+    if(NOT TARGET Vulkan::cppm)
+        add_library(NodensVulkanCppModule STATIC)
+        add_library(Vulkan::cppm ALIAS NodensVulkanCppModule)
 
-    target_compile_definitions(NodensVulkanCppModule PUBLIC
+        target_compile_definitions(NodensVulkanCppModule PUBLIC
             VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
             VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1
             VULKAN_HPP_CXX_MODULE_EXPERIMENTAL_WARNING=1
         )
-    target_include_directories(NodensVulkanCppModule PRIVATE
+        target_include_directories(NodensVulkanCppModule PRIVATE
             "${Vulkan_INCLUDE_DIR}"
         )
-    target_link_libraries(NodensVulkanCppModule PUBLIC Vulkan::Vulkan)
-    set_target_properties(NodensVulkanCppModule PROPERTIES
+        target_link_libraries(NodensVulkanCppModule PUBLIC Vulkan::Vulkan)
+        set_target_properties(NodensVulkanCppModule PROPERTIES
             CXX_STANDARD 23
             CXX_STANDARD_REQUIRED ON
         )
-    target_sources(NodensVulkanCppModule PUBLIC
+        target_sources(NodensVulkanCppModule PUBLIC
             FILE_SET vulkan_modules TYPE CXX_MODULES
             BASE_DIRS "${Vulkan_INCLUDE_DIR}"
             FILES "${Vulkan_INCLUDE_DIR}/vulkan/vulkan.cppm"
         )
 
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      target_compile_options(NodensVulkanCppModule PRIVATE
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            target_compile_options(NodensVulkanCppModule PRIVATE
                 -Wno-reserved-module-identifier
                 -Wno-include-angled-in-module-purview
             )
+        endif()
     endif()
-  endif()
 
-  list(APPEND ND_VULKAN_MODULES
+    list(APPEND ND_VULKAN_MODULES
         src/Platform/Vulkan/VulkanContext.cppm
         src/Platform/Vulkan/VulkanImGuiRenderer.cppm
     )
-  list(APPEND ND_VULKAN_IMPLEMENTATION_UNITS
+    list(APPEND ND_VULKAN_IMPLEMENTATION_UNITS
         src/Platform/Vulkan/VulkanContext.cpp
         src/Platform/Vulkan/VulkanImGuiRenderer.cpp
     )
@@ -215,11 +215,11 @@ target_compile_definitions(Nodens PUBLIC
 )
 
 if(ND_ENABLE_OPENGL)
-  target_compile_definitions(Nodens PRIVATE ND_HAS_OPENGL)
+    target_compile_definitions(Nodens PRIVATE ND_HAS_OPENGL)
 endif()
 if(ND_ENABLE_VULKAN AND Vulkan_FOUND)
-  target_compile_definitions(Nodens PRIVATE ND_HAS_VULKAN)
-  target_link_libraries(Nodens PUBLIC Vulkan::cppm)
+    target_compile_definitions(Nodens PRIVATE ND_HAS_VULKAN)
+    target_link_libraries(Nodens PUBLIC Vulkan::cppm)
 endif()
 
 target_link_libraries(Nodens
@@ -232,14 +232,14 @@ target_link_libraries(Nodens
         TracyClient
 )
 if(ND_ENABLE_OPENGL)
-  target_link_libraries(Nodens PUBLIC glad)
+    target_link_libraries(Nodens PUBLIC glad)
 endif()
 
 # -----------------------------------------------------------------------------
 # Examples
 # -----------------------------------------------------------------------------
 if(ND_BUILD_EXAMPLES)
-  add_subdirectory(examples)
+    add_subdirectory(examples)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -248,15 +248,15 @@ endif()
 find_package(Doxygen QUIET)
 
 if(DOXYGEN_FOUND)
-  set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
-  set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-  add_custom_target(nodens-docs
+    add_custom_target(nodens-docs
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM
     )
 
-  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 endif()

@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Changed
+
+- ImPlot is fetched at `v1.1`, up from `v1.0`.
+
 ### Fixed
 
 - GLFW is fetched at its pinned tag. It was declared but never made available, so the build linked the system copy.

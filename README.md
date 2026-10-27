@@ -86,7 +86,7 @@ All dependencies are resolved automatically at configure time via CMake `FetchCo
 | **[GLAD](https://glad.dav1d.de/)**                  | OpenGL function loader.                                   | v0.1.35            | 
 | **[GLFW](https://www.glfw.org/)**                   | Cross-platform for window, context, and input management. | 3.4                | 
 | **[ImGui](https://github.com/ocornut/imgui)**       | Bloat-free Immediate Mode GUI.                            | v1.92.9b-docking |
-| **[ImPlot](https://github.com/epezent/implot)**     | 2D data plotting extension for ImGui.                     | v1.0               | 
+| **[ImPlot](https://github.com/epezent/implot)**     | 2D data plotting extension for ImGui.                     | v1.1               | 
 | **[ImPlot3D](https://github.com/brenocq/implot3d)** | 3D data plotting extension for ImGui.                     | v0.4               | 
 | **[spdlog](https://github.com/gabime/spdlog)**      | Fast, header-only/compiled logging library.               | v1.17.0            | 
 | **[Tracy](https://github.com/wolfpld/tracy)**       | Real-time frame and GPU profiler.                         | v0.14.1 |

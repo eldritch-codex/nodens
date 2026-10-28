@@ -145,4 +145,18 @@
         "show_command": true,
         "save": "none",
     },
+    {
+        "label": "[Nodens] Run TracyProfiler",
+        "cwd": "$ZED_MAIN_GIT_WORKTREE",
+        "command": "devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/tracy-profiler/bin/tracy-profiler",
+        "use_new_terminal": false,
+        "allow_concurrent_runs": false,
+        "reveal": "always",
+        "reveal_target": "dock",
+        "hide": "never",
+        "shell": "system",
+        "show_summary": true,
+        "show_command": true,
+        "save": "none",
+    },
 ]

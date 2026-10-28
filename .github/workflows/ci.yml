@@ -64,6 +64,16 @@ jobs:
                   docker run --rm -v "$PWD:/work" -w /work "${ND_IMAGE}" \
                     sh -c 'xargs -r clang-format --dry-run -Werror < changed.txt'
 
+    docs:
+        name: Docs
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out
+              uses: actions/checkout@v7
+
+            - name: Relative links in the Markdown
+              run: bash scripts/check-docs-links.sh
+
     build:
         name: Build (${{ matrix.config }})
         runs-on: ubuntu-latest

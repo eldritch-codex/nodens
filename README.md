@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/eldritch-codex/nodens/wiki/Getting-Started">Getting Started</a> ·
-  <a href="https://github.com/eldritch-codex/nodens/wiki">Wiki</a> ·
+  <a href="docs/guide/getting-started.md">Getting Started</a> ·
+  <a href="docs/guide/README.md">Guide</a> ·
   <a href="https://github.com/eldritch-codex/template-nodens-app">Application Template</a>
 </p>
 
@@ -26,15 +26,15 @@
 **Nodens** unifies third-party libraries ([ImGui](https://github.com/ocornut/imgui), [ImPlot](https://github.com/epezent/implot), [ImPlot3D](https://github.com/brenocq/implot3d), [Tracy](https://github.com/wolfpld/tracy)) with a custom core that integrates four systems:
 
 - **GLFW Windows** with OpenGL and Vulkan backends. Nodens exposes no renderer API of its own, since renderers such as [Nyar](https://github.com/eldritch-codex/nyar) borrow the window's graphics backend.
-- **Layer System** that governs the application lifetime, execution flow, render priority and input event routing (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Layer-System)).
-- **Event System** with InputEvent routing through the LayerStack, plus a thread-safe pub/sub EventBus with immediate and queued dispatch (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Event-System)).
-- **Task System** for multithreaded task execution (see [wiki](https://github.com/eldritch-codex/nodens/wiki/Concurrency-and-TaskSystem)).
+- **Layer System** that governs the application lifetime, execution flow, render priority and input event routing (see [Layer System](docs/guide/layer-system.md)).
+- **Event System** with InputEvent routing through the LayerStack, plus a thread-safe pub/sub EventBus with immediate and queued dispatch (see [Event System](docs/guide/event-system.md)).
+- **Task System** for multithreaded task execution (see [Concurrency and TaskSystem](docs/guide/concurrency-and-tasksystem.md)).
 
 Nodens follows a **module-first architecture**: public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`. A project takes Nodens from CMake with `FetchContent`.
 
 The framework compiles into a single **static library** linked to your application, so the result is one portable executable.
 
-Documentation: the [wiki](https://github.com/eldritch-codex/nodens/wiki) holds tutorials, architecture guides and how-tos, including [Building and Toolchain](https://github.com/eldritch-codex/nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/eldritch-codex/nodens/wiki/Profiling-with-Tracy); the API reference is Doxygen output built with `cmake --build build --target nodens-docs`, not yet hosted.
+Documentation: [`docs/`](docs/README.md) indexes it all. The [guide](docs/guide/README.md) holds the tutorials, architecture guides and how-tos, including [Building and Toolchain](docs/guide/building-and-toolchain.md) and [Profiling with Tracy](docs/guide/profiling-with-tracy.md); [`docs/dev`](docs/dev/naming.md) holds the design notes, and the root holds [branching](docs/BRANCHING.md) and [committing](docs/COMMITTING.md). The API reference is Doxygen output built with `cmake --build build --target nodens-docs`, not yet hosted.
 
 ## A minimal application
 
@@ -76,7 +76,7 @@ int main() {
 }
 ```
 
-Layers receive `OnUpdate` and `OnImGuiRender` every frame, plus events routed down the stack. `FApplicationConfig` sets the window size, graphics API, theme and whether ImGui is enabled; the other layer callbacks are in [Layer System](https://github.com/eldritch-codex/nodens/wiki/Layer-System). Building this app needs the toolchain steps in [Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started), or start from the [application template](https://github.com/eldritch-codex/template-nodens-app).
+Layers receive `OnUpdate` and `OnImGuiRender` every frame, plus events routed down the stack. `FApplicationConfig` sets the window size, graphics API, theme and whether ImGui is enabled; the other layer callbacks are in [Layer System](docs/guide/layer-system.md). Building this app needs the toolchain steps in [Getting Started](docs/guide/getting-started.md), or start from the [application template](https://github.com/eldritch-codex/template-nodens-app).
 
 ## Example Applications
 

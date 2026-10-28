@@ -33,7 +33,7 @@ while IFS= read -r file; do
       echo "${file}: links to missing ${target}"
       status=1
     fi
-  done < <(grep -oE '\]\([^)]*\)' "${file}" | sed -e 's/^](//' -e 's/)$//' || true)
+  done < <(awk '/^```/ { fence = !fence; next } !fence' "${file}" | grep -oE '\]\([^)]*\)' | sed -e 's/^](//' -e 's/)$//' || true)
 done < <(git ls-files '*.md' | sort -u)
 
 if [ "${status}" -ne 0 ]; then

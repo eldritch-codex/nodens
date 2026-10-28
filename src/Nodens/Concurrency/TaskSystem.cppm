@@ -36,19 +36,24 @@ public:
     /// @param f The function to execute.
     /// @param args The arguments to forward to the function.
     /// @return A std::future containing the result of the function execution.
+    /// @note The callable and its arguments move into the task, so both may be move-only. A
+    ///       std::reference_wrapper still refers to the caller's object, which must outlive it.
     template <typename F, typename... Args>
-        requires std::invocable<F, Args...>
-    auto Submit(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
+        requires std::invocable<std::decay_t<F>, std::decay_t<Args>...>
+    auto Submit(F&& f, Args&&... args)
+        -> std::future<std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>>
     {
-        using return_type = std::invoke_result_t<F, Args...>;
+        using return_type = std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>;
 
-        auto task = std::make_shared<std::packaged_task<return_type()>>(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+        std::packaged_task<return_type()> task{
+            [f = std::forward<F>(f), ... args = std::forward<Args>(args)]() mutable
+            { return std::invoke(std::move(f), std::move(args)...); }};
 
-        std::future<return_type> res = task->get_future();
+        auto res = task.get_future();
+
         {
             std::unique_lock lock(m_QueueMutex);
-            m_Tasks.emplace([task]() { (*task)(); });
+            m_Tasks.emplace(std::move(task));
             TracyPlot("Job Queue Size", (int64_t)m_Tasks.size());
         }
 

@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+
+- `TaskSystem::Submit` moves the callable and its arguments into the task, which is built from a lambda and `std::invoke` instead of `std::bind` and a `std::shared_ptr<std::packaged_task>`. A move-only argument now reaches a by-value parameter, `std::bind`'s decayed copies are gone, and the shared_ptr node, with its copy taken when the task was queued, is no longer allocated. `Submit` is also constrained on the decayed callable and argument types, which is what the task invokes.
+
 ### Changed
 
 - The CMake option `ND_BUILD_TRACY_PROFILER` is renamed `ND_ADD_TRACY_PROFILER_TARGET`, since it adds the `tracy-profiler` target rather than building it: the target stays out of the default build and is built by name. The default is now `ON`, which only declares the target; a configuration that passed the old option must pass the new one.

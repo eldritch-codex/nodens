@@ -36,6 +36,48 @@ The framework compiles into a single **static library** linked to your applicati
 
 Documentation: the [wiki](https://github.com/eldritch-codex/nodens/wiki) holds tutorials, architecture guides and how-tos, including [Building and Toolchain](https://github.com/eldritch-codex/nodens/wiki/Building-and-Toolchain) and [Profiling with Tracy](https://github.com/eldritch-codex/nodens/wiki/Profiling-with-Tracy); the API reference is Doxygen output built with `cmake --build build --target nodens-docs`, not yet hosted.
 
+## A minimal application
+
+An application subclasses `Nodens::Application`, pushes its layers, and calls `Run()`. The window, ImGui overlay, task system and event bus come with it.
+
+```cpp
+#include <imgui.h>
+
+import nodens;
+
+class HelloLayer : public Nodens::ILayer {
+public:
+    HelloLayer() : ILayer("Hello") {}
+
+    void OnUpdate(Nodens::TimeStep ts) override {
+        m_Seconds += ts.GetSeconds();
+    }
+
+    void OnImGuiRender(Nodens::TimeStep ts) override {
+        ImGui::Begin("Hello, Nodens");
+        ImGui::Text("Running for %.1f s", m_Seconds);
+        ImGui::End();
+    }
+
+private:
+    float m_Seconds = 0.f;
+};
+
+class HelloApp : public Nodens::Application {
+public:
+    HelloApp() : Application({.Name = "Hello Nodens"}) {
+        PushLayer(new HelloLayer());
+    }
+};
+
+int main() {
+    Nodens::InitializeLoggers();
+    HelloApp{}.Run();
+}
+```
+
+Layers receive `OnUpdate` and `OnImGuiRender` every frame, plus events routed down the stack. `FApplicationConfig` sets the window size, graphics API, theme and whether ImGui is enabled; the other layer callbacks are in [Layer System](https://github.com/eldritch-codex/nodens/wiki/Layer-System). Building this app needs the toolchain steps in [Getting Started](https://github.com/eldritch-codex/nodens/wiki/Getting-Started), or start from the [application template](https://github.com/eldritch-codex/template-nodens-app).
+
 ## Example Applications
 
 Examples live in `examples/`:

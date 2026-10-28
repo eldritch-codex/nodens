@@ -26,6 +26,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # -----------------------------------------------------------------------------
 # Developer Options (primary touchpoints)
+option(ND_ADD_TRACY_PROFILER_TARGET
+  "Add the Tracy Profiler GUI as a tracy-profiler target, built on request" ON)
 option(ND_ENABLE_OPENGL "Build the OpenGL backend" ON)
 option(ND_ENABLE_VULKAN "Build the Vulkan backend when Vulkan is available" ON)
 # The examples are on in Nodens' own build and off when another project consumes it. The default
@@ -35,8 +37,6 @@ if(PROJECT_IS_TOP_LEVEL)
 else()
     option(ND_BUILD_EXAMPLES "Build the Nodens example applications" OFF)
 endif()
-option(ND_BUILD_TRACY_PROFILER
-  "Build the Tracy Profiler GUI from Tracy source" OFF)
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -48,7 +48,7 @@ if(ND_ENABLE_OPENGL)
 endif()
 include(NodensDependencies)
 
-if(ND_BUILD_TRACY_PROFILER)
+if(ND_ADD_TRACY_PROFILER_TARGET)
     include(ExternalProject)
     ExternalProject_Add(tracy-profiler
     SOURCE_DIR "${Tracy_SOURCE_DIR}/profiler"

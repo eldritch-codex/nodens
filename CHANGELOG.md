@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Changed
+
+- The CMake option `ND_BUILD_TRACY_PROFILER` is renamed `ND_ADD_TRACY_PROFILER_TARGET`, since it adds the `tracy-profiler` target rather than building it: the target stays out of the default build and is built by name. The default is now `ON`, which only declares the target; a configuration that passed the old option must pass the new one.
+
 ## [0.2.1] - 2026-10-27
 
 ### Added

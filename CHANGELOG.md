@@ -6,11 +6,19 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ### Added
 
+- `scripts/check-docs-links.sh` fails on a relative Markdown link under `docs/` that points at a path missing from the tree. The CI `docs` job runs it.
 - `TaskSystem::Submit` moves the callable and its arguments into the task, which is built from a lambda and `std::invoke` instead of `std::bind` and a `std::shared_ptr<std::packaged_task>`. A move-only argument now reaches a by-value parameter, `std::bind`'s decayed copies are gone, and the shared_ptr node, with its copy taken when the task was queued, is no longer allocated. `Submit` is also constrained on the decayed callable and argument types, which is what the task invokes.
 
 ### Changed
 
+- Every change goes through a short-lived branch and a squashed pull request, whatever its type. The direct-to-`main` route for `docs`, `style`, `chore` and tooling `build` commits is removed. See `docs/BRANCHING.md`.
+- The tutorial and architecture pages moved from the GitHub wiki into `docs/guide/`, one page per file, with an index at `docs/guide/README.md` and every link written as a repo-relative path. The pages ship with the code, so a change to an API and its explanation land in one commit.
+- `docs/` is split by audience: `guide/` for application writers, `dev/` for the design notes on backends, C++ modules, dependencies and type names, and the branching and committing pages at the root, with `docs/README.md` as the index of all three.
 - The CMake option `ND_BUILD_TRACY_PROFILER` is renamed `ND_ADD_TRACY_PROFILER_TARGET`, since it adds the `tracy-profiler` target rather than building it: the target stays out of the default build and is built by name. The default is now `ON`, which only declares the target; a configuration that passed the old option must pass the new one.
+
+### Removed
+
+- `scripts/check.sh`. Every change now gets a CI run on its pull request before it lands, so the local copy of the CI steps is gone.
 
 ## [0.2.1] - 2026-10-27
 

@@ -1,34 +1,86 @@
 # Creating a Custom Layer
 
-Build one layer from scratch: a window of live frame statistics that pauses when you press Space.
+Build one layer from scratch: a panel of live iteration statistics that pauses when Space is pressed.
 
 > [!NOTE]
-> **Mental model.** A layer is a class you hand over to Nodens, and from then on Nodens calls you. You write a C++ module that exports one class derived from `Nodens::ILayer`, push an instance, and override only the callbacks you care about.
->
-> The tutorial has five steps:
->
-> 1. **Declare the class.** [Step 1](#step-1-declare-the-module-interface)
-> 2. **Fill in the callbacks.** [Step 2](#step-2-implement-the-layer)
-> 3. **Tell CMake about the files.** [Step 3](#step-3-register-with-cmake)
-> 4. **Push the layer.** [Step 4](#step-4-push-the-layer)
-> 5. **Build and run.** [Step 5](#step-5-build-and-run)
->
-> You need a working Nodens application, such as one made from the [template](https://github.com/eldritch-codex/template-nodens-app) ([Getting Started](./getting-started.md)), and a glance at the [Layer System](./layer-system.md). The steps add a layer interface and its implementation file to your own project, and change its CMakeLists and its main source file.
+> **Mental model.** A layer is a class you hand to Nodens, and from then on Nodens calls it. You write a C++ module that exports one class derived from `Nodens::ILayer`, push an instance, and override only the callbacks you need.
 
-## Step 1: Declare the Module Interface
+## Problem
 
-A layer lives in a C++ module. The interface file (`.cppm`) declares the module and the class; the implementation goes in a separate `.cpp` file.
+A layer is the unit that receives the loop's callbacks, but making one run touches four things, and each fails differently when it is wrong.
+
+A class needs a module interface and an implementation file. The implementation must include the ImGui header outside the module, which means a global module fragment in a fixed place. The build needs the interface named as a module, not as an ordinary source. And the layer must be pushed as a raw pointer that the framework then owns.
+
+Get the first three wrong and the build fails with an error that names the symptom rather than the cause. Get the fourth wrong and the application double-frees a layer or leaks one.
+
+## How it works
+
+### The three files
+
+| File | Holds | Why it is separate |
+|---|---|---|
+| `MyLayer.cppm` | `export module`, the class, its members | The interface is what other modules import |
+| `MyLayer.cpp` | The callback bodies, and the ImGui include in the global module fragment | Third-party headers cannot enter a module's purview |
+| `CMakeLists.txt` | The implementation as a source, the interface in a `CXX_MODULES` file set | The build must know which file is a module |
+
+### The five callbacks
+
+| Callback | Runs | Use it for |
+|---|---|---|
+| `OnAttach()` | Once, inside `PushLayer` | Resources, subscriptions, fonts |
+| `OnDetach()` | Once, at shutdown | Releasing what `OnAttach` took |
+| `OnUpdate(TimeStep)` | Once per step | State and simulation |
+| `OnImGuiRender(TimeStep)` | Once per iteration, when there is an overlay | Drawing |
+| `OnInputEvent(RoutedInputEvent&)` | Per input event, back to front | One-shot reactions |
+
+All five are optional. [Layer System](./layer-system.md) explains the order they run in.
+
+### Pushing it
+
+`PushLayer(new MyLayer())` from the application constructor. Two rules come with it: the `LayerStack` owns the pointer and deletes it at shutdown, so never delete it yourself, and the push order decides update order, with the reverse deciding input order.
+
+## What still goes wrong
+
+**The interface left out of the build.** A `.cppm` listed as an ordinary source, or forgotten, produces a module that nothing can import.
+
+**The layer deleted by hand.** The stack owns it and deletes it at shutdown, so a manual `delete` frees it twice.
+
+**An include inside the module.** Writing `#include <imgui.h>` after `module MyApp.MyLayer;` puts a third-party header inside the module purview, which the language forbids for this case.
+
+**A key that toggles itself many times.** Holding Space produces one `KeyPressed` with `RepeatCount` zero followed by repeats with a higher count, so a handler that ignores the count flickers the state.
+
+**A key that never arrives.** While an ImGui text field has focus, the overlay consumes the keyboard first.
+
+**An update that runs more than expected.** In fixed pacing `OnUpdate` runs once per step, and an iteration may run several steps.
+
+## Remedies
+
+**Name the interface in a `CXX_MODULES` file set.** That is the only place the build learns the file is a module.
+
+**Never delete a layer you pushed.** Pass a pointer from `new` and let the stack handle the rest.
+
+**Put the include in the global module fragment,** above `module MyApp.MyLayer;`.
+
+**Check `RepeatCount`.** Consume the event only when it is zero, so one press toggles the state once.
+
+**Read the input policy.** `ShouldImGuiBlockInputs` decides whether the overlay keeps keys that ImGui wants, and [Event System](./event-system.md) explains when to change it.
+
+**Treat `OnUpdate` as per step.** Multiply by `ts`, and count steps rather than iterations.
+
+## A worked case
+
+### Step 1: declare the module interface
 
 ```cpp
-// src/FrameStatsLayer.cppm
-export module MyApp.FrameStatsLayer;
+// src/IterationStatsLayer.cppm
+export module MyApp.IterationStatsLayer;
 
 import nodens;
 
-export class FrameStatsLayer : public Nodens::ILayer
+export class IterationStatsLayer : public Nodens::ILayer
 {
 public:
-    FrameStatsLayer();
+    IterationStatsLayer();
 
     void OnAttach() override;
     void OnDetach() override;
@@ -37,75 +89,71 @@ public:
     void OnInputEvent(Nodens::RoutedInputEvent& event) override;
 
 private:
-    float m_SmoothedFrameMs{0.0f}; // Moving average of the frame time
-    float m_Elapsed{0.0f};         // Seconds the layer has been running
+    float m_SmoothedIterationMs{0.0f}; // Moving average of one iteration's time
+    float m_Elapsed{0.0f};             // Seconds the layer has been running
     bool m_Paused{false};
 };
 ```
 
-- `export module MyApp.FrameStatsLayer;` names the module. Any dotted name works; `MyApp.` is a convention that keeps your modules apart from Nodens' own.
-- `import nodens;` is the only import you need for the framework. It brings in `ILayer`, `TimeStep`, `RoutedInputEvent`, the logger and the rest.
-- You override only the callbacks you need. They are all optional.
+`export module MyApp.IterationStatsLayer;` names the module, and any dotted name works; the `MyApp.` prefix is a convention that keeps your modules apart from the framework's. `import nodens;` is the only import needed: it brings in `ILayer`, `TimeStep`, `RoutedInputEvent` and the logger.
 
-## Step 2: Implement the Layer
-
-The implementation file starts with a global module fragment so it can include the ImGui header, then declares which module it implements.
+### Step 2: implement the layer
 
 ```cpp
-// src/FrameStatsLayer.cpp
+// src/IterationStatsLayer.cpp
 module;
 
 #include <imgui.h>
 
-module MyApp.FrameStatsLayer;
+module MyApp.IterationStatsLayer;
 
 import nodens;
 
-FrameStatsLayer::FrameStatsLayer() : ILayer("FrameStats")
+IterationStatsLayer::IterationStatsLayer() : ILayer("IterationStats")
 {
 }
 
-void FrameStatsLayer::OnAttach()
+void IterationStatsLayer::OnAttach()
 {
     Nodens::ClientLogger().info("{} attached", GetName());
 }
 
-void FrameStatsLayer::OnDetach()
+void IterationStatsLayer::OnDetach()
 {
     Nodens::ClientLogger().info("{} detached after {:.1f} s", GetName(), m_Elapsed);
 }
 
-void FrameStatsLayer::OnUpdate(Nodens::TimeStep ts)
+void IterationStatsLayer::OnUpdate(Nodens::TimeStep ts)
 {
     if (m_Paused)
         return;
 
     m_Elapsed += ts.GetSeconds();
 
-    // Each frame moves the average 5% of the way toward the latest frame time.
+    // Each update moves the average 5% of the way toward the latest measurement.
     constexpr float kSmoothing{0.05f};
-    m_SmoothedFrameMs += kSmoothing * (ts.GetMilliseconds() - m_SmoothedFrameMs);
+    m_SmoothedIterationMs += kSmoothing * (ts.GetMilliseconds() - m_SmoothedIterationMs);
 }
 
-void FrameStatsLayer::OnImGuiRender(Nodens::TimeStep)
+void IterationStatsLayer::OnImGuiRender(Nodens::TimeStep)
 {
-    ImGui::Begin("Frame Stats");
+    ImGui::Begin("Iteration Stats");
 
-    const float fps = m_SmoothedFrameMs > 0.0f ? 1000.0f / m_SmoothedFrameMs : 0.0f;
-    ImGui::Text("Frame time: %.2f ms (%.0f FPS)", m_SmoothedFrameMs, fps);
+    const float perSecond = m_SmoothedIterationMs > 0.0f ? 1000.0f / m_SmoothedIterationMs : 0.0f;
+    ImGui::Text("Iteration time: %.2f ms (%.0f per second)", m_SmoothedIterationMs, perSecond);
     ImGui::Text("Running for: %.1f s", m_Elapsed);
 
     ImGui::Checkbox("Paused (Space toggles)", &m_Paused);
     if (ImGui::Button("Reset"))
     {
         m_Elapsed = 0.0f;
-        m_SmoothedFrameMs = 0.0f;
+        m_SmoothedIterationMs = 0.0f;
     }
 
     ImGui::End();
 }
 
-void FrameStatsLayer::OnInputEvent(Nodens::RoutedInputEvent& event)
+void IterationStatsLayer::OnInputEvent(Nodens::RoutedInputEvent& event)
 {
     Nodens::InputEventDispatcher dispatcher(event);
     dispatcher.Dispatch<Nodens::InputEvents::KeyPressed>(
@@ -123,36 +171,32 @@ void FrameStatsLayer::OnInputEvent(Nodens::RoutedInputEvent& event)
 
 What each callback does here:
 
-- **`OnAttach` and `OnDetach`** log through `Nodens::ClientLogger()`, the application's logger (named `APP`). `OnDetach` runs when the application shuts down.
-- **`OnUpdate`** receives the frame's `TimeStep`. The smoothing line is an exponential moving average: instead of showing each frame's time, which jitters, it moves a fixed fraction toward the new sample.
-- **`OnImGuiRender`** draws with the ImGui API directly; the framework has already opened the ImGui frame. See [Using ImGui and ImPlot](./using-imgui-and-implot.md).
-- **`OnInputEvent`** receives a `RoutedInputEvent`. The `InputEventDispatcher` runs your lambda only when the event holds a `KeyPressed`. The lambda's return value decides whether the event is consumed: `true` stops it reaching layers below this one. Returning `false` for any other key leaves it free for them.
+- **`OnAttach` and `OnDetach`** log through `Nodens::ClientLogger()`, the application's logger, named `APP`. `OnDetach` runs at shutdown.
+- **`OnUpdate`** receives the step's `TimeStep`. The smoothing line is an exponential moving average: instead of showing one measurement, which jitters, it moves a fixed fraction toward the newest one.
+- **`OnImGuiRender`** draws with the ImGui API directly, because the overlay has already opened the frame. See [Using ImGui and ImPlot](./using-imgui-and-implot.md).
+- **`OnInputEvent`** receives a `RoutedInputEvent`, and the dispatcher runs the lambda only for a `KeyPressed`. The return value decides consumption: `true` stops the event reaching the layers below.
 
-## Step 3: Register with CMake
-
-The interface file is a module, so it goes in a `CXX_MODULES` file set. The implementation file is an ordinary source. Update the app's CMakeLists:
+### Step 3: register with CMake
 
 ```cmake
-add_executable(NodensApp src/main.cpp src/FrameStatsLayer.cpp)
+add_executable(NodensApp src/main.cpp src/IterationStatsLayer.cpp)
 
 target_sources(NodensApp
     PRIVATE
         FILE_SET app_modules TYPE CXX_MODULES
-        FILES src/FrameStatsLayer.cppm
+        FILES src/IterationStatsLayer.cppm
 )
 
 target_link_libraries(NodensApp PRIVATE Nodens::Nodens)
 ```
 
-Each additional layer adds its implementation to `add_executable` and its interface to the `FILES` list. The development image uses the Ninja generator by default, which CMake needs to work out the order in which modules must be built.
+Each added layer contributes its implementation to `add_executable` and its interface to the `FILES` list. The development image uses the Ninja generator, which CMake needs to work out the order in which modules are built.
 
-## Step 4: Push the Layer
-
-Import your module in the application's main source file and push the layer from its constructor:
+### Step 4: push the layer
 
 ```cpp
 import nodens;
-import MyApp.FrameStatsLayer;
+import MyApp.IterationStatsLayer;
 
 class MyApp : public Nodens::Application
 {
@@ -166,7 +210,7 @@ public:
 
     MyApp() : Application(appConfig)
     {
-        PushLayer(new FrameStatsLayer());
+        PushLayer(new IterationStatsLayer());
     }
 };
 
@@ -181,14 +225,9 @@ int main()
 }
 ```
 
-Two rules apply to `PushLayer`:
+The layer sits below the `ImGuiLayer` overlay, because the application pushed the overlay first. It therefore draws under the overlay's dockspace and receives input after it. [Layer System](./layer-system.md) has the order table.
 
-- **Ownership.** Pass a pointer from `new` and do not delete it. The `LayerStack` owns the layer and deletes it when the application shuts down.
-- **Order.** Layers update and draw in the order you push them, and receive input in the reverse order. With several layers, the last one pushed sees input first. All of them sit below the `ImGuiLayer` overlay. See [Layer System](./layer-system.md).
-
-## Step 5: Build and Run
-
-Build and run from inside the devcontainer:
+### Step 5: build and run
 
 ```shell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -196,16 +235,30 @@ cmake --build build --target NodensApp
 ./build/NodensApp
 ```
 
-You should see:
+What you should see:
 
-- A window with a **Frame Stats** panel showing the smoothed frame time, an FPS figure and a running timer.
-- `FrameStats attached` in the console when the app starts, and `FrameStats detached after N s` when you close the window.
-- Pressing **Space** pauses the timer and ticks the **Paused** checkbox. Pressing it again resumes. While an ImGui text field has keyboard focus, the `ImGuiLayer` consumes the key first and your layer does not see it, which is the intended input blocking (see [Event System](./event-system.md)).
+- A window with an **Iteration Stats** panel showing the smoothed iteration time, the rate per second and a running timer.
+- `IterationStats attached` in the console at start, and `IterationStats detached after N s` when the window closes.
+- Pressing Space pauses the timer and ticks the checkbox; pressing it again resumes.
+- While an ImGui text field has keyboard focus, the overlay consumes the key first, so the layer does not see it. That is the intended blocking, explained in [Event System](./event-system.md).
 
-## Where to go next
+## Choosing
 
-- Understand the callbacks and ordering: [Layer System](./layer-system.md).
-- Handle more input: [Event System](./event-system.md).
-- Move work off the main thread with the [Concurrency and TaskSystem](./concurrency-and-tasksystem.md).
-- Send results between layers with the `EventBus`, as in the PlanetaryScan example ([Examples Guide](./examples-guide.md)).
-- Draw plots with ImPlot ([Using ImGui and ImPlot](./using-imgui-and-implot.md)).
+- **Which callbacks?** Override only what the layer needs. An empty body costs a virtual call per step and nothing else.
+- **Layer or overlay?** `PushLayer` for application content, `PushOverlay` for a debug panel or an input filter that must run first.
+- **Module or header?** Nodens is module-first, so a layer used by another module is an exported module interface. A layer private to one executable may be a plain header, but the CMake file set differs and the examples use modules.
+
+## Rules
+
+1. One class per layer, exported from its own module.
+2. The ImGui include goes above `module ...;`, never below it.
+3. Push a pointer from `new`, and never delete it.
+4. Consume an input event only when you mean to stop it reaching the layers below.
+5. Do state in `OnUpdate`, drawing in `OnImGuiRender`.
+
+## See Also
+
+- [Layer System](./layer-system.md): the callbacks and their order.
+- [Event System](./event-system.md): input events and the bus.
+- [Concurrency and TaskSystem](./concurrency-and-tasksystem.md): moving work off the main thread.
+- [Using ImGui and ImPlot](./using-imgui-and-implot.md): plots inside a layer.

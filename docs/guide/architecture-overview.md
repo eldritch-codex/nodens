@@ -28,13 +28,13 @@ flowchart TD
   Win --> GB[IGraphicsBackend]
 ```
 
-The `LayerStack` owns every layer and deletes it when the application ends. When `EnableGUI` is true, `Application` itself creates the `ImGuiLayer` and pushes it as an overlay.
+The `LayerStack` owns every layer and deletes it when the application ends. When `FApplicationConfig::Presentation` is `EPresentation::WindowImGUI`, `Application` itself creates the `ImGuiLayer` and pushes it as an overlay.
 
 You write a single `import nodens;`. That umbrella module re-exports everything public:
 
 | Group | Modules | Role |
 |---|---|---|
-| Core | `Nodens.Application`, `Nodens.Log`, `Nodens.TimeStep` | Lifecycle, logging, frame delta time |
+| Core | `Nodens.Application`, `Nodens.FramePacer`, `Nodens.Log`, `Nodens.TimeStep` | Lifecycle, frame timing, logging |
 | Layers | `Nodens.Layer`, `Nodens.LayerStack` | `ILayer` and the ordered stack that holds layers |
 | Events | `Nodens.Event`, `Nodens.EventBus`, `Nodens.InputEvents` | Plain-data events, the bus, window and input events |
 | Concurrency | `Nodens.TaskSystem` | Thread pool with `std::future` results |
@@ -46,17 +46,17 @@ The platform classes (`GlfwWindow`, `OpenGLBackend`, `VulkanBackend` and the two
 
 ## The frame
 
-`Application::Run()` repeats the same steps until a `WindowClose` event ends it:
+`Application::Run()` repeats the same steps until something requests a stop, which a `WindowClose` event does:
 
-1. **Time.** Measure the `TimeStep`, the time since the previous frame.
+1. **Time.** `FramePacer::BeginFrame` measures the `TimeStep` and how many steps this iteration runs.
 2. **Flush the event bus.** Deliver events queued since the last frame, on the main thread.
 3. **Begin the Vulkan frame.** With Vulkan, acquire a swapchain image and open the command buffer, so everything that records GPU work this frame, including ImGui, appends to one buffer.
 4. **Update.** Call `OnUpdate(ts)` on every layer, front to back.
 5. **Draw ImGui.** If the GUI is enabled, call `OnImGuiRender(ts)` on every layer between `ImGuiLayer::Begin()` and `End()`.
-6. **Poll and present.** The window polls GLFW, which fires input callbacks, and presents the frame.
+6. **Poll and present.** The window polls GLFW, which fires input callbacks, and presents the frame. This step is skipped when the application has no window.
 7. **Mark the frame** for the Tracy profiler.
 
-[Layer System](./layer-system.md) describes the callbacks each layer receives in steps 4 and 5.
+[Layer System](./layer-system.md) describes the callbacks each layer receives in steps 4 and 5, and [Application Loop](./application-loop.md) covers pacing, the stop request and windowless runs.
 
 ## Messages
 
@@ -89,7 +89,7 @@ You choose the API per application with `FApplicationConfig::GraphicsAPI`:
 |---|---|---|---|
 | `Vulkan` (default) | GLFW window with no client API | `VulkanBackend` | `VulkanImGuiRenderer` |
 | `OpenGL` | GLFW window with an OpenGL context | `OpenGLBackend` | `OpenGLImGuiRenderer` |
-| `NoAPI` | GLFW window with no client API | none | none, so `EnableGUI = true` is a fatal error at startup |
+| `NoAPI` | GLFW window with no client API | none | none, so `EPresentation::WindowImGUI` is a fatal error at startup |
 
 The backends are also chosen at **build time** with `ND_ENABLE_OPENGL` and `ND_ENABLE_VULKAN`, both on by default. Selecting a backend that was not compiled in is a fatal error at startup ("Nodens was built without Vulkan support!"). [Building and Toolchain](./building-and-toolchain.md) explains what happens when the Vulkan SDK is missing at configure time.
 

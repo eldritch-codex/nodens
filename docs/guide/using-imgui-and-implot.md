@@ -16,7 +16,7 @@ Draw your user interface and plots from a layer, with [Dear ImGui](https://githu
 
 ## What Nodens sets up
 
-When `FApplicationConfig::EnableGUI` is true, `Application` creates an `ImGuiLayer` with a renderer for your graphics API and pushes it as an overlay. You never create it yourself. If `EnableGUI` is false there is no ImGui layer and `OnImGuiRender` is never called.
+When `FApplicationConfig::Presentation` is `EPresentation::WindowImGUI`, `Application` creates an `ImGuiLayer` with a renderer for your graphics API and pushes it as an overlay. You never create it yourself. In the other two states there is no ImGui layer and `OnImGuiRender` is never called.
 
 On attach, the `ImGuiLayer` creates the ImGui, ImPlot and ImPlot3D contexts, enables keyboard navigation and docking, applies the theme, and initializes the renderer for the chosen API. Multi-viewport is enabled only with the OpenGL backend; the default Vulkan backend runs ImGui in the main window.
 

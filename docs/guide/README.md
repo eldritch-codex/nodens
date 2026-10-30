@@ -8,7 +8,7 @@ Nodens is a C++23 framework for interactive desktop applications. These pages ex
 > The guide follows that picture, in the order you will need it:
 >
 > 1. **Run something.** [Getting Started](./getting-started.md) builds the template.
-> 2. **See the whole.** [Architecture Overview](./architecture-overview.md) shows what the application owns and what one frame does.
+> 2. **See the whole.** [Architecture Overview](./architecture-overview.md) shows what the application owns and what one frame does; [Application Loop](./application-loop.md) covers pacing and windowless runs.
 > 3. **Meet the parts.** [Layer System](./layer-system.md) (your code), [Event System](./event-system.md) (messages) and [Concurrency and TaskSystem](./concurrency-and-tasksystem.md) (background work).
 > 4. **Write your own.** [Creating a Custom Layer](./creating-a-custom-layer.md), then [Using ImGui and ImPlot](./using-imgui-and-implot.md) for the UI.
 > 5. **Build and measure.** [Building and Toolchain](./building-and-toolchain.md) and [Profiling with Tracy](./profiling-with-tracy.md).
@@ -26,7 +26,7 @@ Nodens is a C++23 framework for interactive desktop applications. These pages ex
 ## Pages
 
 - **Getting started:** [Getting Started](./getting-started.md), and the [application template](https://github.com/eldritch-codex/template-nodens-app).
-- **Architecture:** [Architecture Overview](./architecture-overview.md), [Layer System](./layer-system.md), [Event System](./event-system.md), [Concurrency and TaskSystem](./concurrency-and-tasksystem.md).
+- **Architecture:** [Architecture Overview](./architecture-overview.md), [Application Loop](./application-loop.md), [Layer System](./layer-system.md), [Event System](./event-system.md), [Concurrency and TaskSystem](./concurrency-and-tasksystem.md).
 - **Guides:** [Building and Toolchain](./building-and-toolchain.md), [Creating a Custom Layer](./creating-a-custom-layer.md), [Using ImGui and ImPlot](./using-imgui-and-implot.md), [Profiling with Tracy](./profiling-with-tracy.md).
 - **Reference:** [Examples Guide](./examples-guide.md).
 

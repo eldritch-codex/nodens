@@ -84,7 +84,7 @@ public:
       .Name = "My Nodens Application",
       .WindowWidth = 1280,
       .WindowHeight = 720,
-      .EnableGUI = true,
+      .Presentation = Nodens::EPresentation::WindowImGUI,
       .ShouldImGuiBlockInputs = true,
       .Theme = Nodens::ETheme::Dark};
 

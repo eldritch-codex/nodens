@@ -144,6 +144,7 @@ endif()
 set(ND_FRAMEWORK_IMPLEMENTATION_UNITS
     # Core
     src/Nodens/Core/Application.cpp
+    src/Nodens/Core/FramePacer.cpp
     # Layers
     src/Nodens/Layers/Layer.cpp
     src/Nodens/Layers/LayerStack.cpp
@@ -164,6 +165,7 @@ set(ND_FRAMEWORK_IMPLEMENTATION_UNITS
 set(ND_FRAMEWORK_MODULE_INTERFACES
     # Core
     src/Nodens/Core/Application.cppm
+    src/Nodens/Core/FramePacer.cppm
     src/Nodens/Core/Log.cppm
     src/Nodens/Core/TimeStep.cppm
     # Layers

@@ -8,6 +8,7 @@ Start at the [guide index](guide/README.md). The pages, in reading order:
 
 - [Getting Started](guide/getting-started.md): a window on screen from the application template.
 - [Architecture Overview](guide/architecture-overview.md): what the application owns and what one frame does.
+- [Application Loop](guide/application-loop.md): one iteration, the pacing modes, and running with no window.
 - [Layer System](guide/layer-system.md): the five layer callbacks and the stack they sit in.
 - [Event System](guide/event-system.md): routed input and the pub/sub event bus.
 - [Concurrency and TaskSystem](guide/concurrency-and-tasksystem.md): background work and how results come back.
@@ -15,7 +16,7 @@ Start at the [guide index](guide/README.md). The pages, in reading order:
 - [Using ImGui and ImPlot](guide/using-imgui-and-implot.md): UI, themes and 2D and 3D plots.
 - [Building and Toolchain](guide/building-and-toolchain.md): compilers, options, GPUs, CI and troubleshooting.
 - [Profiling with Tracy](guide/profiling-with-tracy.md): the `Profiling` build and reading a capture.
-- [Examples Guide](guide/examples-guide.md): the two example applications, page by page.
+- [Examples Guide](guide/examples-guide.md): the three example applications, page by page.
 
 ## Design notes
 

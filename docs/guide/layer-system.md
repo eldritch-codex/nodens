@@ -62,7 +62,7 @@ flowchart TD
 - **All `OnUpdate` calls finish before any `OnImGuiRender` starts.** The UI always draws the state produced by this frame's update.
 - **`OnDetach` runs at shutdown.** `Application` has `PushLayer` and `PushOverlay` but no way to remove a layer, so a layer lives from its push until the application ends.
 
-`TimeStep` is the time since the previous frame, as a `float`:
+`TimeStep` is the length of one update step, in seconds, as a `float`. It is the measured frame time in variable pacing and `FixedDelta` in fixed pacing, so a layer reads a step length either way (see [Application Loop](./application-loop.md)):
 
 ```cpp
 void OnUpdate(Nodens::TimeStep ts) override
@@ -77,7 +77,7 @@ Multiply speeds by `ts` so motion takes the same time at any frame rate.
 
 ## Update, draw, input
 
-- **State changes go in `OnUpdate`, drawing in `OnImGuiRender`.** `OnImGuiRender` runs only when the GUI is enabled (`EnableGUI = true`), so logic placed there stops running without a GUI.
+- **State changes go in `OnUpdate`, drawing in `OnImGuiRender`.** `OnImGuiRender` runs only in the overlay state (`EPresentation::WindowImGUI`), so logic placed there stops running without a GUI.
 - **Keep both cheap.** They run on the main thread every frame. Hand long work to the [Concurrency and TaskSystem](./concurrency-and-tasksystem.md).
 - **`OnInputEvent` is for things that happen once**: a key press, a resize, a close request. For state that is held, poll from `OnUpdate` with `Nodens::Input::IsKeyPressed(...)` or `Input::GetMousePosition()`. [Event System](./event-system.md) shows how a layer consumes an event.
 
@@ -96,7 +96,7 @@ The stack is one list, `[layers ... | overlays ...]`. Push `A` then `B`, with th
 | 1 | `B` | second | second |
 | 2 | `ImGuiLayer` (overlay) | last | first |
 
-`Application` pushes the `ImGuiLayer` as an overlay when `EnableGUI` is true, before your constructor body runs, so your `PushLayer` calls insert below it. ImGui therefore draws on top and sees every input event first, which lets it keep the keyboard or mouse while ImGui wants them. Use `PushOverlay` for your own always-on-top pieces, such as a debug HUD or an input filter that must run before your other layers.
+`Application` pushes the `ImGuiLayer` as an overlay when the presentation is `EPresentation::WindowImGUI`, before your constructor body runs, so your `PushLayer` calls insert below it. ImGui therefore draws on top and sees every input event first, which lets it keep the keyboard or mouse while ImGui wants them. Use `PushOverlay` for your own always-on-top pieces, such as a debug HUD or an input filter that must run before your other layers.
 
 ## Ownership
 

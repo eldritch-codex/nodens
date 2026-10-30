@@ -7,10 +7,12 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 ### Added
 
 - `scripts/check-docs-links.sh` fails on a relative Markdown link under `docs/` that points at a path missing from the tree. The CI `docs` job runs it.
+- `FPacingConfig::Pacing` selects a fixed-step mode (`EPacing::Fixed`) next to the default variable one: the pacer accumulates wall time into steps of `FixedDelta`, caps catch-up at `MaxStepsPerFrame`, and sleeps to the step boundary so the loop does not spin. `examples/headlesspulse --fixed` runs it, and the example ends each run with a summary of steps, simulated time, wall time and time per step, so the two modes compare run by run.
 - `TaskSystem::Submit` moves the callable and its arguments into the task, which is built from a lambda and `std::invoke` instead of `std::bind` and a `std::shared_ptr<std::packaged_task>`. A move-only argument now reaches a by-value parameter, `std::bind`'s decayed copies are gone, and the shared_ptr node, with its copy taken when the task was queued, is no longer allocated. `Submit` is also constrained on the decayed callable and argument types, which is what the task invokes.
 
 ### Changed
 
+- `Application::Run()` takes each frame's time from the new `Nodens.FramePacer` module instead of reading the window, and clamps it to `FPacingConfig::MaxFrameDelta` (250 ms by default), so a dragged window or a suspended process no longer reaches layers as one long step. `FApplicationConfig` gains `Pacing` for the policy, and the old `m_LastFrameTime` member is gone.
 - Every change goes through a short-lived branch and a squashed pull request, whatever its type. The direct-to-`main` route for `docs`, `style`, `chore` and tooling `build` commits is removed. See `docs/BRANCHING.md`.
 - The tutorial and architecture pages moved from the GitHub wiki into `docs/guide/`, one page per file, with an index at `docs/guide/README.md` and every link written as a repo-relative path. The pages ship with the code, so a change to an API and its explanation land in one commit.
 - `docs/` is split by audience: `guide/` for application writers, `dev/` for the design notes on backends, C++ modules, dependencies and type names, and the branching and committing pages at the root, with `docs/README.md` as the index of all three.

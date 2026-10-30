@@ -30,6 +30,8 @@
 - **Event System** with InputEvent routing through the LayerStack, plus a thread-safe pub/sub EventBus with immediate and queued dispatch (see [Event System](docs/guide/event-system.md)).
 - **Task System** for multithreaded task execution (see [Concurrency and TaskSystem](docs/guide/concurrency-and-tasksystem.md)).
 
+The window and the ImGui overlay are optional: the same loop services layers and events with no window at all, paced by an explicit policy (see [Application Loop](docs/guide/application-loop.md)).
+
 Nodens follows a **module-first architecture**: public APIs are module interfaces (`.cppm`), third-party headers are isolated on the global fragment module, and consumers simply `import nodens;`. A project takes Nodens from CMake with `FetchContent`.
 
 The framework compiles into a single **static library** linked to your application, so the result is one portable executable.

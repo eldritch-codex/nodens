@@ -12,6 +12,7 @@ import Nodens.LayerStack;
 import Nodens.ImGuiLayer;
 import Nodens.Window;
 import Nodens.DefaultTheme;
+import Nodens.FramePacer;
 import std;
 
 export namespace Nodens
@@ -27,11 +28,13 @@ struct FApplicationConfig
     std::uint32_t WindowWidth{1280};        ///< Initial window width in pixels.
     std::uint32_t WindowHeight{720};        ///< Initial window height in pixels.
     bool EnableGUI{true};                   ///< Whether to create the ImGui overlay layer.
+    bool CreateWindow{true}; ///< Whether to create the platform window. False runs the loop headless.
     bool VSync{false};                      ///< If true, vertical synchronization is enabled.
     EGraphicsAPI GraphicsAPI{
         EGraphicsAPI::Vulkan}; ///< Client graphics API for the application window.
     bool ShouldImGuiBlockInputs{true};
     ETheme Theme{ETheme::Dark}; ///< The visual theme applied by the ImGui layer.
+    FPacingConfig Pacing{};     ///< Frame-timing policy for the main loop.
 };
 
 /// @brief The central singleton that owns the window, layer stack, task system, and main loop.
@@ -71,6 +74,11 @@ public:
     ///          The loop is driven by a monotonic clock for frame-time calculation.
     void Run();
 
+    /// @brief Requests the main loop to stop after the current iteration.
+    /// @details This is the only writer of the running flag, so a layer can end the
+    ///          application without a window close. OnWindowClose() calls it as well.
+    void RequestStop();
+
     /// @brief Dispatches an event through the layer stack (back-to-front).
     /// @param e The event to dispatch. May be marked as handled by a layer.
     void OnInputEvent(RoutedInputEvent& e);
@@ -84,8 +92,14 @@ public:
     void PushOverlay(ILayer* overlay);
 
     /// @brief Returns a reference to the application window.
+    /// @details Terminates the process when the application was configured without a window;
+    ///          check HasWindow() first.
     /// @return Reference to the IWindow instance.
     IWindow& GetWindow();
+
+    /// @brief Reports whether this application owns a window.
+    /// @return True when a window was created.
+    bool HasWindow() const;
 
     /// @brief Returns a reference to the application's task system.
     /// @return Reference to the TaskSystem instance.
@@ -104,14 +118,14 @@ public:
     static Application& Get();
 
 private:
-    /// @brief Handles the WindowCloseEvent by setting the running flag to false.
+    /// @brief Handles the WindowCloseEvent by requesting the main loop to stop.
     /// @param e The window close event.
     /// @return Always false: the close event is deliberately not consumed, so every layer below
     ///         still receives it.
     bool OnWindowClose(InputEvents::WindowClose& e);
 
     FApplicationConfig m_Config; ///< Stored copy of the startup configuration.
-    bool m_Running{true};        ///< Main loop sentinel; false triggers shutdown.
+    bool m_Running{true};        ///< Main loop sentinel; written only by RequestStop().
 
     std::unique_ptr<IWindow> m_Window; ///< The platform window.
 
@@ -121,7 +135,7 @@ private:
     std::unique_ptr<TaskSystem> m_TaskSystem; ///< The multithreaded task system.
     std::unique_ptr<EventBus> m_EventBus;     ///< The event bus system.
 
-    float m_LastFrameTime{0.0f}; ///< Timestamp of the previous frame (seconds since start).
+    std::unique_ptr<FramePacer> m_Pacer; ///< Supplies each iteration's time to the loop.
 
 private:
     static Application* s_Instance; ///< Pointer to the sole Application instance.

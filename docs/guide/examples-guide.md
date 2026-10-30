@@ -1,6 +1,6 @@
 # Examples Guide
 
-Two small programs in the Nodens repository, each the smallest complete application for one idea. Read them after the concept pages, or alongside them. The README has a [short overview](../../README.md#example-applications).
+Three small programs in the Nodens repository, each the smallest complete application for one idea. Read them after the concept pages, or alongside them. The README has a [short overview](../../README.md#example-applications).
 
 > [!NOTE]
 > **Mental model.** Each example is an application class that pushes a single layer. Learn the shape once, then read what the layer does.
@@ -9,10 +9,11 @@ Two small programs in the Nodens repository, each the smallest complete applicat
 > |---|---|---|
 > | [`circularwave3d`](#circularwave3d) | **Drawing:** layer state plus ImPlot and ImPlot3D | [Using ImGui and ImPlot](./using-imgui-and-implot.md) |
 > | [`planetaryscan`](#planetaryscan) | **Concurrency:** tasks on workers, results back through the event bus | [Concurrency and TaskSystem](./concurrency-and-tasksystem.md), [Event System](./event-system.md) |
+> | [`headlesspulse`](#headlesspulse) | **Lifecycle:** a loop with no window, ended by a layer | [Layer System](./layer-system.md) |
 >
 > Then [how to run them](#running-the-examples).
 
-Both examples have the same shape. They live in `examples/<name>/` in the Nodens repository and consist of:
+The two windowed examples have the same shape. They live in `examples/<name>/` in the Nodens repository and consist of:
 
 - an application file with `main()` and a `Nodens::Application` subclass that pushes the layer, and
 - a layer module (`.cppm`) plus its implementation (`.cpp`).
@@ -105,6 +106,23 @@ sequenceDiagram
 - [`examples/planetaryscan/PlanetaryScanLayer.cppm`](../../examples/planetaryscan/PlanetaryScanLayer.cppm): The event struct, its formatter and the layer interface
 - [`examples/planetaryscan/PlanetaryScanLayer.cpp`](../../examples/planetaryscan/PlanetaryScanLayer.cpp): Subscribing, launching tasks, storing results and drawing
 
+## headlesspulse
+
+**Demonstrates:** a main loop with no window at all, and a layer that ends the application itself.
+
+It is one file and no layer module. `main()` fills an `FApplicationConfig` with `CreateWindow = false` and `EnableGUI = false`, pushes a layer that counts steps, and calls `Run()`.
+
+### How it works
+
+- **No window.** The application creates no platform window and no ImGui overlay, so `GetWindow()` would terminate the process; `HasWindow()` reports the truth instead.
+- **Time still flows.** `Application::Run` takes each step from `Nodens.FramePacer`, which is why the loop needs no window to pace it.
+- **Self-termination.** The layer, not a window close, requests the stop, which is what lets a headless run finish on its own after 600 steps.
+- **Output.** Every hundredth step prints the step count, and the run ends with one summary line: the mode, the steps, the simulated seconds, the wall seconds and the seconds per step. Run `--variable` and then `--fixed` and the two lines show what pacing changes: the same 600 steps, about a millisecond of simulated time in the first and 10 seconds in the second.
+
+### Key Files
+
+- [`examples/headlesspulse/HeadlessPulseApp.cpp`](../../examples/headlesspulse/HeadlessPulseApp.cpp): the whole example, from config to entry point
+
 ---
 
 ## Running the Examples
@@ -118,6 +136,7 @@ cmake --build build
 # Run an example
 ./build/examples/circularwave3d/example-circularwave3d
 ./build/examples/planetaryscan/example-planetaryscan
+./build/examples/headlesspulse/example-headlesspulse
 ```
 
 To build only one, name its target: `cmake --build build --target example-planetaryscan`. To profile an example, configure with `-DCMAKE_BUILD_TYPE=Profiling` and connect the Tracy profiler; see [Profiling with Tracy](./profiling-with-tracy.md).

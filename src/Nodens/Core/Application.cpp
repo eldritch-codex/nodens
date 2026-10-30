@@ -10,6 +10,7 @@ module;
 module Nodens.Application;
 
 import Nodens.TimeStep;
+import Nodens.FramePacer;
 import Nodens.Event;
 import Nodens.LayerStack;
 import Nodens.Log;
@@ -42,18 +43,23 @@ Application::Application(const FApplicationConfig& config) : m_Config(config)
     m_TaskSystem = std::make_unique<TaskSystem>();
     m_LayerStack = std::make_unique<LayerStack>();
     m_EventBus = std::make_unique<EventBus>();
+    m_Pacer = std::make_unique<FramePacer>(m_Config.Pacing);
 
-    FWindowConfig windowConfig{
-        .Title = m_Config.Name,
-        .Width = m_Config.WindowWidth,
-        .Height = m_Config.WindowHeight,
-        .VSync = m_Config.VSync,
-        .GraphicsAPI = m_Config.GraphicsAPI,
-    };
-    m_Window = std::unique_ptr<IWindow>(IWindow::Create(windowConfig));
-    m_Window->SetInputEventCallback([this](RoutedInputEvent& event) { OnInputEvent(event); });
+    if (m_Config.CreateWindow)
+    {
+        FWindowConfig windowConfig{
+            .Title = m_Config.Name,
+            .Width = m_Config.WindowWidth,
+            .Height = m_Config.WindowHeight,
+            .VSync = m_Config.VSync,
+            .GraphicsAPI = m_Config.GraphicsAPI,
+        };
+        m_Window = std::unique_ptr<IWindow>(IWindow::Create(windowConfig));
+        m_Window->SetInputEventCallback([this](RoutedInputEvent& event) { OnInputEvent(event); });
+    }
 
-    if (m_Config.EnableGUI)
+    // The ImGui overlay draws into a window, so a headless application has none.
+    if (m_Config.EnableGUI && m_Window)
     {
         std::shared_ptr<ImGuiRenderer> imguiRenderer;
         bool rendererCreated{false};
@@ -105,8 +111,15 @@ void Application::PushOverlay(ILayer* overlay)
     overlay->OnAttach();
 }
 
+bool Application::HasWindow() const
+{
+    return m_Window != nullptr;
+}
+
 IWindow& Application::GetWindow()
 {
+    if (!m_Window)
+        FatalCore("Application was configured without a window!");
     return *m_Window;
 }
 
@@ -132,22 +145,17 @@ Application& Application::Get()
 
 void Application::Run()
 {
-    const auto startTime = std::chrono::steady_clock::now();
-
     while (m_Running)
     {
         ZoneScoped;
 
-        const auto currentTime = std::chrono::steady_clock::now();
-        float time = std::chrono::duration<float>(currentTime - startTime).count();
-        TimeStep timestep = time - m_LastFrameTime;
-        m_LastFrameTime = time;
+        const FFrameTime frame = m_Pacer->BeginFrame();
 
         // Flush queued non-input events
         m_EventBus->Flush();
 
 #if defined(ND_HAS_VULKAN)
-        if (m_Config.GraphicsAPI == EGraphicsAPI::Vulkan)
+        if (m_Window && m_Config.GraphicsAPI == EGraphicsAPI::Vulkan)
         {
             // Acquire once before layers run so Nyar and ImGui append to the same command buffer.
             auto* backend = dynamic_cast<VulkanBackend*>(m_Window->GetBackend());
@@ -157,28 +165,36 @@ void Application::Run()
         }
 #endif
 
-        // Update each layer
-        for (ILayer* layer : *m_LayerStack)
-            layer->OnUpdate(timestep);
+        // Update each layer once per simulation step
+        for (int step = 0; step < frame.Steps; ++step)
+            for (ILayer* layer : *m_LayerStack)
+                layer->OnUpdate(frame.Step);
 
         if (m_ImGuiLayer)
         {
             m_ImGuiLayer->Begin();
             for (ILayer* layer : *m_LayerStack)
-                layer->OnImGuiRender(timestep);
+                layer->OnImGuiRender(frame.Step);
             m_ImGuiLayer->End();
         }
 
         if (m_Window)
             m_Window->OnUpdate();
 
+        m_Pacer->EndFrame();
+
         FrameMark;
     }
 }
 
-bool Application::OnWindowClose(InputEvents::WindowClose& e)
+void Application::RequestStop()
 {
     m_Running = false;
+}
+
+bool Application::OnWindowClose(InputEvents::WindowClose& e)
+{
+    RequestStop();
     return false; // Do not consume the event. Let other layers know that the application will be
                   // closed.
 }

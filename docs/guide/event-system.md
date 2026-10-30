@@ -46,7 +46,7 @@ Input events come from the window and form a closed set, defined in `src/Nodens/
 ### How an event reaches your layer
 
 1. A GLFW callback in `GlfwWindow.cpp` builds a `RoutedInputEvent` and passes it to `Application::OnInputEvent`.
-2. `Application` handles `WindowClose` itself (it stops the main loop), then calls `ILayer::OnInputEvent` on each layer **back to front**.
+2. `Application` handles `WindowClose` itself (it requests the main loop to stop), then calls `ILayer::OnInputEvent` on each layer **back to front**.
 3. Iteration stops as soon as a layer sets `Handled = true`.
 
 Back to front means overlays go first, so the `ImGuiLayer` can claim input before your layers see it.

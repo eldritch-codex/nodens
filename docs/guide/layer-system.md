@@ -62,7 +62,7 @@ flowchart TD
 - **All `OnUpdate` calls finish before any `OnImGuiRender` starts.** The UI always draws the state produced by this frame's update.
 - **`OnDetach` runs at shutdown.** `Application` has `PushLayer` and `PushOverlay` but no way to remove a layer, so a layer lives from its push until the application ends.
 
-`TimeStep` is the time since the previous frame, as a `float`:
+`TimeStep` is the length of one update step, in seconds, as a `float`. It is the measured frame time in variable pacing and `FixedDelta` in fixed pacing, so a layer reads a step length either way (see [Application Loop](./application-loop.md)):
 
 ```cpp
 void OnUpdate(Nodens::TimeStep ts) override

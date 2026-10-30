@@ -16,8 +16,8 @@ export namespace Nodens
 /// @brief A special overlay Layer that owns the ImGui context and delegates rendering
 ///        to an injected ImGuiRenderer backend.
 /// @details ImGuiLayer is automatically pushed as an overlay by Application when
-///          `EPresentation::WindowImGUI` is selected. It creates the ImGui, ImPlot, and ImPlot3D contexts
-///          on attach, applies the selected DefaultTheme, and brackets each frame with
+///          `EPresentation::WindowImGUI` is selected. It creates the ImGui, ImPlot, and ImPlot3D
+///          contexts on attach, applies the selected DefaultTheme, and brackets each frame with
 ///          Begin() / End() calls so that other layers can issue ImGui draw commands
 ///          in their OnImGuiRender() overrides.
 ///
@@ -66,8 +66,8 @@ public:
     }
 
 private:
-    bool m_BlockInputEvents = true;              ///< Whether to consume events captured by ImGui.
-    ETheme m_Theme = ETheme::Dark; ///< The visual theme applied during OnAttach().
-    std::shared_ptr<ImGuiRenderer> m_Renderer;   ///< The injected rendering backend.
+    bool m_BlockInputEvents = true;            ///< Whether to consume events captured by ImGui.
+    ETheme m_Theme = ETheme::Dark;             ///< The visual theme applied during OnAttach().
+    std::shared_ptr<ImGuiRenderer> m_Renderer; ///< The injected rendering backend.
 };
 } // namespace Nodens

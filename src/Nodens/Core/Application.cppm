@@ -41,7 +41,7 @@ struct FApplicationConfig
     std::uint32_t WindowHeight{720};        ///< Initial window height in pixels.
     EPresentation Presentation{
         EPresentation::WindowImGUI}; ///< Whether to create a window and the ImGui overlay.
-    bool VSync{false};                      ///< If true, vertical synchronization is enabled.
+    bool VSync{false};               ///< If true, vertical synchronization is enabled.
     EGraphicsAPI GraphicsAPI{
         EGraphicsAPI::Vulkan}; ///< Client graphics API for the application window.
     bool ShouldImGuiBlockInputs{true};

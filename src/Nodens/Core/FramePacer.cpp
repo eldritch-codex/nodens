@@ -41,8 +41,8 @@ FFrameTime FramePacer::BeginFrame()
     ZoneScoped;
 
     const auto now = std::chrono::steady_clock::now();
-    const float delta = ClampFrameDelta(
-        std::chrono::duration<float>(now - m_LastFrame).count(), m_Config.MaxFrameDelta);
+    const float delta = ClampFrameDelta(std::chrono::duration<float>(now - m_LastFrame).count(),
+                                        m_Config.MaxFrameDelta);
     m_LastFrame = now;
 
     if (m_Config.Pacing == EPacing::Variable)

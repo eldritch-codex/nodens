@@ -20,8 +20,8 @@ constexpr int kStepsToRun = 600;
 /// @brief Counters the layer fills in, printed once the loop has ended.
 struct FPulseStats
 {
-    int Steps{0};                       ///< Steps the loop ran.
-    double SimulatedSeconds{0.0};       ///< Time those steps represent.
+    int Steps{0};                 ///< Steps the loop ran.
+    double SimulatedSeconds{0.0}; ///< Time those steps represent.
 };
 
 /// @brief Counts loop steps and stops the application after a fixed number of them.

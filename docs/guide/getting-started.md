@@ -4,45 +4,63 @@ Go from nothing to a running Nodens window by starting from the application temp
 
 > [!NOTE]
 > **Mental model.** Your application is two pieces of code that CMake joins together: yours, and Nodens. The template is a small CMake project that downloads Nodens at a fixed release tag, compiles everything with Clang inside the published devcontainer image, and links your program against `Nodens::Nodens`.
->
-> The steps, in order:
->
-> 1. **Install the tools.** [Prerequisites](#prerequisites)
-> 2. **Create your project.** [Start from the template](#start-from-the-template)
-> 3. **Build and run it.** [Build and run](#build-and-run)
-> 4. **Read what you got.** [What is in the template](#what-is-in-the-template)
-> 5. **Move to a newer Nodens.** [Upgrading](#upgrading-nodens)
-> 6. **Change Nodens itself.** [Working on the framework](#working-on-the-framework)
 
 > ⚠️ **Linux only.** The published development image builds and validates Nodens applications on Linux. Native Windows and macOS builds are not supported. See [Building and Toolchain](./building-and-toolchain.md).
 
 ## Prerequisites
 
-Install Docker and an editor with Dev Container support: [Zed](https://zed.dev/), or [Visual Studio Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+| You need | Why |
+|---|---|
+| Docker | The toolchain, desktop libraries and GPU runtime live in the published image |
+| An editor with Dev Container support | [Zed](https://zed.dev/), or [Visual Studio Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) |
+| The Dev Containers CLI, only if the editor stays on the host | The tracked Zed tasks and debug scenarios call `devcontainer`; install it with `npm install -g @devcontainers/cli` |
+| The NVIDIA Container Toolkit, only on an NVIDIA host | The `nvidia` configuration requests the GPU; the `dri` configuration needs nothing extra on Intel and AMD |
 
-Everything else comes in one published image, `ghcr.io/eldritch-codex/arch-dev:main`: the C++ toolchain, the X11 and Wayland development files that GLFW builds against, OpenGL and Vulkan tools and shader tooling. The template and the Nodens repository each ship two Dev Container configurations, `nvidia` and `dri` (Intel and AMD); your editor asks which to open. NVIDIA hosts need the NVIDIA Container Toolkit first. See [Building and Toolchain](./building-and-toolchain.md) for both.
+Everything else arrives in one image, `ghcr.io/eldritch-codex/arch-dev:main`: the C++ toolchain, the X11 and Wayland development files that GLFW builds against, OpenGL and Vulkan tools, and the shader tooling. The template and the Nodens repository each ship two Dev Container configurations, `nvidia` and `dri`; your editor asks which to open.
 
-If you keep Zed on the host instead of reopening it in the container, install the Dev Containers CLI (`npm install -g @devcontainers/cli`). The tracked Zed tasks and debug scenarios use it to build, run and debug inside the container. See [Building and Toolchain](./building-and-toolchain.md).
+## Steps
 
-## Start from the template
+### 1. Create your project
 
-On the [Nodens Application Template](https://github.com/eldritch-codex/template-nodens-app), select **Use this template** to create your repository, open it in your editor, and reopen it in the devcontainer. The template's README has the details.
+On the [Nodens Application Template](https://github.com/eldritch-codex/template-nodens-app), select **Use this template** to create your repository.
 
-## Build and run
+**Success looks like** a new repository of your own, holding a `CMakeLists.txt` and a `src` directory with the application's entry point.
 
-The devcontainer's default compiler is Clang, the one Nodens is built and tested with. Configure, build and run:
+### 2. Open it in the container
+
+Open the repository in your editor and reopen it in the dev container, choosing `nvidia` or `dri`.
+
+**Success looks like** an editor whose terminal reports the image's tools:
+
+```shell
+clang++ --version
+cmake --version
+```
+
+Both must print a version. If `cmake` reports older than 3.30, the editor opened the project on the host rather than in the container.
+
+### 3. Configure and build
 
 ```shell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --target NodensApp
+```
+
+The container's default compiler is Clang, the one Nodens is built and tested with, so no compiler flag is needed.
+
+**Success looks like** a linked executable named `NodensApp`, inside the build directory.
+
+### 4. Run it
+
+```shell
 ./build/NodensApp
 ```
 
-A window opens. That is a complete Nodens application.
+**Success looks like** a window opening, empty except for the ImGui overlay's dockspace. That is a complete Nodens application.
 
-## What is in the template
+### 5. Read the two files that matter
 
-Two files matter: the `CMakeLists.txt` that fetches Nodens, and the application class.
+The CMake file that fetches Nodens:
 
 ```cmake
 cmake_minimum_required(VERSION 3.30)
@@ -73,7 +91,7 @@ target_link_libraries(NodensApp PRIVATE Nodens::Nodens)
 
 The `GIT_TAG` pins one Nodens release, so every build gets the same framework version.
 
-The application subclasses `Nodens::Application` and describes itself with an `FApplicationConfig`:
+The application class, which subclasses `Nodens::Application` and describes itself with an `FApplicationConfig`:
 
 ```cpp
 import nodens;
@@ -102,16 +120,17 @@ int main() {
 }
 ```
 
-The specification also has `VSync` and `GraphicsAPI` fields (the default API is Vulkan). To put your own code in the application, continue with [Creating a Custom Layer](./creating-a-custom-layer.md).
+`FApplicationConfig` also carries `VSync`, `GraphicsAPI` (Vulkan by default) and `Pacing`. To put your own code in the application, continue with [Creating a Custom Layer](./creating-a-custom-layer.md).
 
-## Upgrading Nodens
+### 6. Move to a newer Nodens
 
-Change the tag in `FetchContent_Declare` to a newer release from the [Nodens releases](https://github.com/eldritch-codex/nodens/releases) and rebuild. While Nodens is at 0.x, a release that changes the API bumps the minor version, so read the [changelog](../../CHANGELOG.md) before moving from 0.1 to 0.2.
+Change the tag in `FetchContent_Declare` to a release from the [Nodens releases](https://github.com/eldritch-codex/nodens/releases), then reconfigure and build again.
 
-## Working on the framework
+**Success looks like** a clean build against the new tag. While Nodens is at 0.x, a release that changes the API bumps the minor version, so read the [changelog](../../CHANGELOG.md) before moving from 0.1 to 0.2.
 
-Clone the Nodens repository only when you want to change the framework itself. It uses the same development image as applications, so both share one compiler, desktop, Vulkan and shader environment. Changes to that image are made in the [Devcontainers repository](https://github.com/eldritch-codex/devcontainers) and can be tested locally. Nodens keeps a single trunk, `main`; see [Branching and releases](../BRANCHING.md).
-To develop an application and the framework together, replace `FetchContent` with a local checkout:
+### 7. Develop the framework and your application together
+
+Clone the Nodens repository only when you want to change the framework itself, then replace `FetchContent` with a local checkout:
 
 ```cmake
 add_subdirectory(path/to/Nodens)
@@ -119,10 +138,22 @@ add_executable(myapp main.cpp)
 target_link_libraries(myapp PRIVATE Nodens::Nodens)
 ```
 
-`CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` must still come before `project()` in your own `CMakeLists.txt`, because Nodens cannot enable that toolchain feature after your project has enabled C++. This still builds Nodens from source; an installable CMake package is not provided.
+**Success looks like** your application building against the checkout, with your change visible in its behaviour.
 
-## Next steps
+`CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` must still come before `project()` in your own CMake file, because Nodens cannot enable that toolchain feature after your project has enabled C++. This still builds Nodens from source; an installable CMake package is not provided.
 
-- [Creating a Custom Layer](./creating-a-custom-layer.md): add your own behavior.
+## Troubleshooting
+
+**The build stops at `cmake --version` reporting an old version.** The editor opened the folder on the host. Reopen it in the container, which carries CMake 3.30 or newer.
+
+**The application exits with "Nodens was built without Vulkan support!".** The framework was configured without the Vulkan backend, usually because the SDK was missing when CMake ran. Use the container, with a fresh build directory. [Building and Toolchain](./building-and-toolchain.md) has the check.
+
+**A Zed task prints `devcontainer: command not found`.** Install the Dev Containers CLI and restart Zed, which keeps the `PATH` it started with.
+
+**Configure fails while downloading.** The first configuration fetches dependencies from their upstream repositories, so it needs network access from inside the container.
+
+## See Also
+
+- [Creating a Custom Layer](./creating-a-custom-layer.md): add your own behaviour.
 - [Architecture Overview](./architecture-overview.md): how the framework is structured.
-- [Building and Toolchain](./building-and-toolchain.md): compilers, options, dependencies and troubleshooting.
+- [Building and Toolchain](./building-and-toolchain.md): compilers, options, dependencies and the rest of the troubleshooting.

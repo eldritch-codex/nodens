@@ -28,7 +28,7 @@ flowchart TD
   Win --> GB[IGraphicsBackend]
 ```
 
-The `LayerStack` owns every layer and deletes it when the application ends. When `EnableGUI` is true, `Application` itself creates the `ImGuiLayer` and pushes it as an overlay.
+The `LayerStack` owns every layer and deletes it when the application ends. When `FApplicationConfig::Presentation` is `EPresentation::WindowImGUI`, `Application` itself creates the `ImGuiLayer` and pushes it as an overlay.
 
 You write a single `import nodens;`. That umbrella module re-exports everything public:
 
@@ -89,7 +89,7 @@ You choose the API per application with `FApplicationConfig::GraphicsAPI`:
 |---|---|---|---|
 | `Vulkan` (default) | GLFW window with no client API | `VulkanBackend` | `VulkanImGuiRenderer` |
 | `OpenGL` | GLFW window with an OpenGL context | `OpenGLBackend` | `OpenGLImGuiRenderer` |
-| `NoAPI` | GLFW window with no client API | none | none, so `EnableGUI = true` is a fatal error at startup |
+| `NoAPI` | GLFW window with no client API | none | none, so `EPresentation::WindowImGUI` is a fatal error at startup |
 
 The backends are also chosen at **build time** with `ND_ENABLE_OPENGL` and `ND_ENABLE_VULKAN`, both on by default. Selecting a backend that was not compiled in is a fatal error at startup ("Nodens was built without Vulkan support!"). [Building and Toolchain](./building-and-toolchain.md) explains what happens when the Vulkan SDK is missing at configure time.
 

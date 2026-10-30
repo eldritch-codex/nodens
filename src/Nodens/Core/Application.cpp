@@ -45,7 +45,10 @@ Application::Application(const FApplicationConfig& config) : m_Config(config)
     m_EventBus = std::make_unique<EventBus>();
     m_Pacer = std::make_unique<FramePacer>(m_Config.Pacing);
 
-    if (m_Config.CreateWindow)
+    const bool wantsWindow = m_Config.Presentation != EPresentation::Headless;
+    const bool wantsOverlay = m_Config.Presentation == EPresentation::WindowImGUI;
+
+    if (wantsWindow)
     {
         FWindowConfig windowConfig{
             .Title = m_Config.Name,
@@ -58,8 +61,8 @@ Application::Application(const FApplicationConfig& config) : m_Config(config)
         m_Window->SetInputEventCallback([this](RoutedInputEvent& event) { OnInputEvent(event); });
     }
 
-    // The ImGui overlay draws into a window, so a headless application has none.
-    if (m_Config.EnableGUI && m_Window)
+    // The overlay draws into a window, so it exists only in the state that has both.
+    if (wantsOverlay)
     {
         std::shared_ptr<ImGuiRenderer> imguiRenderer;
         bool rendererCreated{false};
@@ -113,7 +116,7 @@ void Application::PushOverlay(ILayer* overlay)
 
 bool Application::HasWindow() const
 {
-    return m_Window != nullptr;
+    return m_Config.Presentation != EPresentation::Headless;
 }
 
 IWindow& Application::GetWindow()

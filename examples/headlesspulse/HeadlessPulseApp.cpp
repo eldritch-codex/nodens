@@ -56,8 +56,7 @@ int main(int argc, char** argv)
 
     Nodens::FApplicationConfig config{};
     config.Name = "HeadlessPulse";
-    config.EnableGUI = false;
-    config.CreateWindow = false;
+    config.Presentation = Nodens::EPresentation::Headless;
 
     const char* mode = "variable";
     for (int i = 1; i < argc; ++i)

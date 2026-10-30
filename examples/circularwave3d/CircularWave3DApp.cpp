@@ -14,7 +14,7 @@ public:
         .Name = "[NodensApp Example] CircularWave3D",
         .WindowWidth = 800,
         .WindowHeight = 600,
-        .EnableGUI = true,
+        .Presentation = Nodens::EPresentation::WindowImGUI,
     };
 
     CircularWave3DApp() : Application(appConfig)

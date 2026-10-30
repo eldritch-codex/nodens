@@ -13,7 +13,7 @@ public:
         .Name = "[NodensApp Example] PlanetaryScans",
         .WindowWidth = 800,
         .WindowHeight = 600,
-        .EnableGUI = true,
+        .Presentation = Nodens::EPresentation::WindowImGUI,
     };
 
     PlanetaryScanApp() : Application(appConfig)

@@ -18,6 +18,18 @@ import std;
 export namespace Nodens
 {
 
+/// @brief How an application presents itself: a window, the ImGui overlay, or neither.
+/// @details The default pairs a window with the ImGui overlay. `Window` exists for a client
+///          graphics API with no ImGui renderer, such as EGraphicsAPI::NoAPI, and `Headless`
+///          runs the main loop with no window at all.
+/// @ingroup Core
+enum class EPresentation : std::uint8_t
+{
+    Window,      ///< A platform window with no ImGui overlay.
+    WindowImGUI, ///< A platform window with the ImGui overlay layer.
+    Headless,    ///< No window and no overlay; the loop still services layers and events.
+};
+
 /// @brief Configuration data used to initialize an Application instance.
 /// @details Provides sensible defaults for a windowed GUI application.
 ///          Pass a customized instance to the Application constructor to override.
@@ -27,8 +39,8 @@ struct FApplicationConfig
     std::string Name{"Nodens Application"}; ///< Window title and application identifier.
     std::uint32_t WindowWidth{1280};        ///< Initial window width in pixels.
     std::uint32_t WindowHeight{720};        ///< Initial window height in pixels.
-    bool EnableGUI{true};                   ///< Whether to create the ImGui overlay layer.
-    bool CreateWindow{true}; ///< Whether to create the platform window. False runs the loop headless.
+    EPresentation Presentation{
+        EPresentation::WindowImGUI}; ///< Whether to create a window and the ImGui overlay.
     bool VSync{false};                      ///< If true, vertical synchronization is enabled.
     EGraphicsAPI GraphicsAPI{
         EGraphicsAPI::Vulkan}; ///< Client graphics API for the application window.

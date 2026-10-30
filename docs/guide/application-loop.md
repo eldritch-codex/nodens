@@ -52,12 +52,11 @@ Nodens::Application::Get().RequestStop();
 
 ## Running without a window
 
-Set `CreateWindow` and `EnableGUI` to false in the config:
+Select `EPresentation::Headless` in the config:
 
 ```cpp
 Nodens::FApplicationConfig config{};
-config.EnableGUI = false;
-config.CreateWindow = false;
+config.Presentation = Nodens::EPresentation::Headless;
 ```
 
 - The application still owns its task system, layer stack and event bus, and `Run` services all of them.

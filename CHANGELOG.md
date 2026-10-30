@@ -12,6 +12,7 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ### Changed
 
+- `FApplicationConfig` states its window and overlay choice as one `EPresentation` value (`Window`, `WindowImGUI`, `Headless`) instead of the `EnableGUI` and `CreateWindow` booleans, which could express a GUI with no window. `HasWindow()` reads that value, and a config that set either boolean moves to the new field.
 - `Application::Run()` takes each frame's time from the new `Nodens.FramePacer` module instead of reading the window, and clamps it to `FPacingConfig::MaxFrameDelta` (250 ms by default), so a dragged window or a suspended process no longer reaches layers as one long step. `FApplicationConfig` gains `Pacing` for the policy, and the old `m_LastFrameTime` member is gone.
 - Every change goes through a short-lived branch and a squashed pull request, whatever its type. The direct-to-`main` route for `docs`, `style`, `chore` and tooling `build` commits is removed. See `docs/BRANCHING.md`.
 - The tutorial and architecture pages moved from the GitHub wiki into `docs/guide/`, one page per file, with an index at `docs/guide/README.md` and every link written as a repo-relative path. The pages ship with the code, so a change to an API and its explanation land in one commit.

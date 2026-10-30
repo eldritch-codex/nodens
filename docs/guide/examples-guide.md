@@ -42,7 +42,7 @@ public:
         .Name = "[NodensApp Example] CircularWave3D",
         .WindowWidth = 800,
         .WindowHeight = 600,
-        .EnableGUI = true,
+        .Presentation = Nodens::EPresentation::WindowImGUI,
     };
 
     CircularWave3DApp() : Application(appConfig)
@@ -110,7 +110,7 @@ sequenceDiagram
 
 **Demonstrates:** a main loop with no window at all, and a layer that ends the application itself.
 
-It is one file and no layer module. `main()` fills an `FApplicationConfig` with `CreateWindow = false` and `EnableGUI = false`, pushes a layer that counts steps, and calls `Run()`.
+It is one file and no layer module. `main()` fills an `FApplicationConfig` with `EPresentation::Headless`, pushes a layer that counts steps, and calls `Run()`.
 
 ### How it works
 

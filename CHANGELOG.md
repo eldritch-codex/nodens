@@ -7,6 +7,7 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 ### Added
 
 - `scripts/check-docs-links.sh` fails on a relative Markdown link under `docs/` that points at a path missing from the tree. The CI `docs` job runs it.
+- `docs/STYLE.md` states the writing standard for every page: three page shapes, a glossary every page shares, the voice each folder uses, and a checklist to apply before a pull request.
 - `FPacingConfig::Pacing` selects a fixed-step mode (`EPacing::Fixed`) next to the default variable one: the pacer accumulates wall time into steps of `FixedDelta`, caps catch-up at `MaxStepsPerFrame`, and sleeps to the step boundary so the loop does not spin. `examples/headlesspulse --fixed` runs it, and the example ends each run with a summary of steps, simulated time, wall time and time per step, so the two modes compare run by run.
 - `TaskSystem::Submit` moves the callable and its arguments into the task, which is built from a lambda and `std::invoke` instead of `std::bind` and a `std::shared_ptr<std::packaged_task>`. A move-only argument now reaches a by-value parameter, `std::bind`'s decayed copies are gone, and the shared_ptr node, with its copy taken when the task was queued, is no longer allocated. `Submit` is also constrained on the decayed callable and argument types, which is what the task invokes.
 

@@ -7,7 +7,7 @@ Three kinds of page, by who reads them: the guide for people building an applica
 Start at the [guide index](guide/README.md). The pages, in reading order:
 
 - [Getting Started](guide/getting-started.md): a window on screen from the application template.
-- [Architecture Overview](guide/architecture-overview.md): what the application owns and what one frame does.
+- [Architecture Overview](guide/architecture-overview.md): what the application owns and what one iteration does.
 - [Application Loop](guide/application-loop.md): one iteration, the pacing modes, and running with no window.
 - [Layer System](guide/layer-system.md): the five layer callbacks and the stack they sit in.
 - [Event System](guide/event-system.md): routed input and the pub/sub event bus.
@@ -29,6 +29,7 @@ How the framework is built, and why it is shaped this way:
 
 ## Process
 
+- [Writing style](STYLE.md): the page shapes, the glossary every page shares, and the voice each folder uses.
 - [Branching and releases](BRANCHING.md): branches, pull requests, and how a tag becomes a release.
 - [Committing](COMMITTING.md): the message format, the types, and what one commit holds.
 

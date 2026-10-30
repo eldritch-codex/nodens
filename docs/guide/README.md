@@ -3,12 +3,12 @@
 Nodens is a C++23 framework for interactive desktop applications. These pages explain **how and why**: tutorials, architecture and design rationale. Nodens is experimental: while the major version is 0, a release that changes the API bumps the minor version. Linux is the only supported platform. The guide tracks `main`, so what changed between releases lives in the [changelog](../../CHANGELOG.md) and the [releases](https://github.com/eldritch-codex/nodens/releases).
 
 > [!NOTE]
-> **Mental model.** An `Application` is a stage manager. It owns the window, the task system and the event bus, and it runs the show one frame at a time. Your code is a set of **layers** that it calls in order: each frame, every layer updates, draws its UI and gets a chance to react to input. You write the layers; Nodens runs the loop.
+> **Mental model.** An `Application` is a stage manager. It owns the window, the task system and the event bus, and it runs the show one iteration at a time. Your code is a set of **layers** that it calls in order: each iteration it advances those layers by the time that is due, lets each one draw its UI, and gives it a chance to react to input. You write the layers; Nodens runs the loop.
 >
 > The guide follows that picture, in the order you will need it:
 >
 > 1. **Run something.** [Getting Started](./getting-started.md) builds the template.
-> 2. **See the whole.** [Architecture Overview](./architecture-overview.md) shows what the application owns and what one frame does; [Application Loop](./application-loop.md) covers pacing and windowless runs.
+> 2. **See the whole.** [Architecture Overview](./architecture-overview.md) shows what the application owns and what one iteration does; [Application Loop](./application-loop.md) covers pacing and windowless runs.
 > 3. **Meet the parts.** [Layer System](./layer-system.md) (your code), [Event System](./event-system.md) (messages) and [Concurrency and TaskSystem](./concurrency-and-tasksystem.md) (background work).
 > 4. **Write your own.** [Creating a Custom Layer](./creating-a-custom-layer.md), then [Using ImGui and ImPlot](./using-imgui-and-implot.md) for the UI.
 > 5. **Build and measure.** [Building and Toolchain](./building-and-toolchain.md) and [Profiling with Tracy](./profiling-with-tracy.md).

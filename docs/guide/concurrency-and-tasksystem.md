@@ -3,18 +3,21 @@
 How to do slow work without freezing the window: submit it as a task, then collect the result on the main thread.
 
 > [!NOTE]
-> **Mental model.** Picture a fixed crew of workers beside a task board. `Submit` pins your function to the board and hands you a claim slip, a `std::future`. A free worker takes the task, does it and fills in the slip. The main thread never stands around waiting: it glances at the slip once a frame, or receives a queued event when the work is done.
->
-> This page follows a task from start to finish:
->
-> 1. **Submit it.** [Submitting a task](#submitting-a-task)
-> 2. **Collect the result.** [By polling a future](#collecting-by-polling-a-future) or [by event](#collecting-by-event)
-> 3. **Stay safe.** [Thread-safety rules](#thread-safety-rules)
-> 4. **Know the limits.** [What the pool does and does not do](#what-the-pool-does-and-does-not-do)
+> **Mental model.** Picture a fixed crew of workers beside a task board. `Submit` pins your function to the board and hands you a claim slip, a `std::future`. A free worker takes the task, does it and fills in the slip. The main thread never stands around waiting: it glances at the slip once per iteration, or receives a queued event when the work is done.
 
-## Submitting a task
+## Problem
 
-The `TaskSystem` is created and owned by the `Application`; get it with `Application::Get().GetTaskSystem()`. `Submit` takes any callable plus its arguments and returns a `std::future` of the result type:
+The main thread runs everything the user can see: window messages, rendering, ImGui and every layer callback. A slow computation placed there stops all of it, and a window that stops replying looks broken.
+
+The obvious answer, a thread per task, fails for its own reasons. Starting a thread costs far more than running a short task, and a hundred threads compete with the main thread for the same cores, which slows the work that must stay fast.
+
+The `TaskSystem` is one pool of workers, created and owned by the `Application`, with a result handed back in a form the main thread can collect without blocking.
+
+## How it works
+
+### Submitting a task
+
+Get the pool with `Application::Get().GetTaskSystem()`. `Submit` takes any callable plus its arguments and returns a `std::future` of the result type:
 
 ```cpp
 auto& tasks = Nodens::Application::Get().GetTaskSystem();
@@ -25,11 +28,19 @@ std::future<int> answer = tasks.Submit([] { return 6 * 7; });
 std::future<float> root = tasks.Submit(SlowSquareRoot, 2.0f);
 ```
 
-- Arguments are captured **by value** at submit time, so a task never reads a caller's variable that has gone out of scope: an lvalue is copied, an rvalue is moved. The callable is moved in the same way, so a lambda holding a `std::unique_ptr` is accepted.
-- A task that returns `void` gives a `std::future<void>`, still useful for "has it finished" checks and for carrying an exception.
+A task is one callable plus its arguments, captured by value at submit time. The callable is moved in, so a lambda holding a `std::unique_ptr` is accepted.
+
+- Arguments are captured **by value**, so a task never reads a caller's variable that has gone out of scope: an lvalue is copied, an rvalue is moved.
+- A task that returns `void` gives a `std::future<void>`, still useful for a finished check and for carrying an exception.
 - Dropping the future is fine: unlike the future from `std::async`, it does not block when destroyed, and the task still runs.
 
-### Why not `std::bind`
+### The pool
+
+- **Size.** `hardware_concurrency() - 1` workers, so one core stays free for the main thread, and one worker if the machine reports a single hardware thread.
+- **Names.** `Worker 0`, `Worker 1`, and so on, which appear as separate tracks in Tracy.
+- **Shutdown.** When the `Application` is destroyed, each worker finishes the task it is running and exits.
+
+### Why `Submit` does not use `std::bind`
 
 `Submit` builds the packaged task itself, from a lambda with an init capture and `std::invoke`, instead of handing the callable and its arguments to `std::bind`. Three consequences follow, and they are the reason for the choice.
 
@@ -37,7 +48,7 @@ std::future<float> root = tasks.Submit(SlowSquareRoot, 2.0f);
 - **One copy, at submit time.** An lvalue argument is copied once, straight into the task. Through `std::bind` it would be copied into the bind object and then again on the call.
 - **One allocation fewer.** The queue holds `std::move_only_function<void()>`, and the packaged task moves straight into it. The packaged task still keeps its own shared state for the result, but the separate `std::shared_ptr<std::packaged_task>` and its control block are gone.
 
-## Collecting by polling a future
+### Collecting by polling a future
 
 Keep the future as a member, check it without blocking, and take the result when it is ready:
 
@@ -81,15 +92,9 @@ private:
 };
 ```
 
-Why it is written this way:
+### Collecting by event
 
-- **`wait_for(0)`, not `get()`.** `get()` blocks until the task finishes, which would freeze the window. `wait_for` with a zero timeout only asks "is it done?".
-- **`valid()` first.** A default-constructed future, or one already `get()`-ed, is invalid, and calling `wait_for` on it is undefined. The same check stops a second click from submitting a second task.
-- **Exceptions travel through the future.** If the task throws, `get()` rethrows on the main thread, so wrap it in `try` if the task can fail.
-
-## Collecting by event
-
-A future suits one task and one consumer. When several tasks report to a layer that is already listening, queue an event from the worker instead. The PlanetaryScan example does this: the layer subscribes in `OnAttach`, each task ends with `EventBus::QueueEvent`, and the bus delivers the results on the main thread at the start of the next frame.
+A future suits one task and one consumer. When several tasks report to a layer that is already listening, queue an event from the worker instead:
 
 ```cpp
 Nodens::Application::Get().GetTaskSystem().Submit(
@@ -101,33 +106,77 @@ Nodens::Application::Get().GetTaskSystem().Submit(
     });
 ```
 
-See [Event System](./event-system.md) for events and [Examples Guide](./examples-guide.md) for the whole example.
+The PlanetaryScan example does this: the layer subscribes in `OnAttach`, each task ends with `QueueEvent`, and the bus delivers the results on the main thread at the start of the next iteration. [Event System](./event-system.md) covers the bus, and [Examples Guide](./examples-guide.md) the whole example.
 
-## Thread-safety rules
+## What still goes wrong
 
-| Safe from a worker thread | Not safe from a worker thread |
-|---|---|
-| Pure computation on your own data | Window calls and anything touching the native window |
-| `TaskSystem::Submit` | Rendering and graphics backend calls |
-| `EventBus::QueueEvent` | Any `ImGui::` or `ImPlot::` call |
-| Reading `Application::Get()` | Pushing layers or touching the `LayerStack` |
-| Writing to your own data behind a mutex | Calling `EventBus::Flush` yourself (the application does it once per frame) |
+**A blocking `get()` on the main thread.** It waits for the task, which freezes the window for exactly as long as the work takes.
 
-Two more rules:
+**`wait_for` on an invalid future.** A default-constructed future, or one already collected, is invalid, and calling `wait_for` on it is undefined.
 
-- **Protect shared data.** A layer's members are read on the main thread and may be written by a task. Guard them with a `std::mutex`, as the PlanetaryScan layer does, or hand data over through a future or a queued event.
-- **`EventBus::Dispatch` runs on the calling thread.** Called from a worker, subscribers run on that worker. Use `QueueEvent` when the handler must run on the main thread.
+**A worker touching the UI.** Window calls, rendering, and every `ImGui::` and `ImPlot::` call belong to the main thread.
 
-## What the pool does and does not do
+**Shared members read and written from both sides.** A layer's members are read on the main thread while a task may write them.
 
-- **Size.** `hardware_concurrency() - 1` workers, so one core stays free for the main thread (one worker if the machine reports a single hardware thread). They are named `Worker 0`, `Worker 1`, and so on, which shows as separate tracks in Tracy.
-- **Why a pool.** Starting a thread costs far more than running a short task, and unbounded threads would fight the main thread for cores.
-- **Shutdown.** When the `Application` is destroyed, each worker finishes the task it is running and exits. Do not rely on a task that is still queued: it may start just as shutdown begins, or it is discarded, and `get()` on the future of a discarded task throws a `std::future` error with the condition `broken_promise`.
-- **Not provided in 0.1.1.** There are no task priorities, no cancelling a queued task and no dependencies between tasks. Build those on top of futures if you need them.
-- **Profiling.** With the `Profiling` build, the queue length is plotted as "Job Queue Size", the queue mutex shows contention, and each task is a zone. Add your own with `ZoneScopedN("My Task")`. See [Profiling with Tracy](./profiling-with-tracy.md).
+**A queued task assumed to run at shutdown.** A task that has not started may be discarded when the application ends, and `get()` on its future throws with the condition `broken_promise`.
+
+**An exception lost in the future.** A task that throws rethrows on the main thread when the result is collected, and nowhere else.
+
+**Priorities, cancellation or dependencies.** The pool provides none of them.
+
+## Remedies
+
+**Poll with `wait_for(0)` and collect when ready.** That is the "is it done" question, and it costs nothing when the answer is no.
+
+**Check `valid()` first.** It guards the invalid case and stops a second submission while one is in flight.
+
+**Keep UI work on the main thread.** A worker computes, then reports through a queued event or a future the main thread reads.
+
+**Guard shared data with a mutex, or hand it over.** Copy the input into the task, and send the result back through the future or the bus, so no member is touched by two threads at once.
+
+**Do not depend on an unstarted task at shutdown.** Wait for the results the application still needs before it ends.
+
+**Collect every future you rely on.** An exception surfaces only when the result is read.
+
+**Build missing behaviour on futures.** Priorities, cancellation and dependencies are application-level concerns on top of `Submit`, not pool features.
+
+## A worked case
+
+The `TaskDemoLayer` above, over four iterations, with a task that sleeps 500 ms:
+
+| Iteration | What the layer does | What the user sees |
+|---|---|---|
+| 1 | The button is pressed and `Submit` returns a future | "Working..." |
+| 2 | `wait_for(0)` reports `timeout` | "Working..." |
+| 30 | `wait_for(0)` reports `ready`, `get()` takes 1.4142 | "Last result: 1.4142" |
+
+The number in the third row is `sqrt(2)`, and the row count varies with the frame rate: at 60 Hz about thirty iterations pass in half a second, at 20 Hz about ten. Nothing in the layer depends on that count, because the check asks the future rather than counting iterations.
+
+With the event form, the same work looks like this:
+
+| Step | Thread | What happens |
+|---|---|---|
+| 1 | main | The layer subscribes in `OnAttach` |
+| 2 | main | A button submits a task |
+| 3 | worker | The task computes and calls `QueueEvent` |
+| 4 | main | The next iteration flushes and the handler runs |
+
+## Choosing
+
+- **A future or an event?** Use a future for one task and one consumer that polls. Use the bus when several tasks report to one listener, or when the producer should not know the consumer.
+- **Poll or block?** Poll, unless the result is needed before anything else can proceed, and even then block only off the main thread.
+- **How small a task?** Big enough that the submit cost and the copy are a small share of the work. A task that takes microseconds is cheaper to run inline.
+
+## Rules
+
+1. Nothing that draws, polls a window or touches ImGui runs on a worker.
+2. `Submit` and `QueueEvent` are safe from any thread; `Dispatch` and `Flush` are not.
+3. Capture by value, and prefer moving data into the task over sharing it.
+4. Poll futures with `wait_for(0)`, and collect every result you depend on.
+5. Do not wait for an unstarted task at shutdown.
 
 ## See Also
 
 - [Architecture Overview](./architecture-overview.md): where the `TaskSystem` fits in the threading model.
 - [Event System](./event-system.md): queued events, the other way back to the main thread.
-- [Profiling with Tracy](./profiling-with-tracy.md): visualizing worker activity.
+- [Profiling with Tracy](./profiling-with-tracy.md): queue length, contention and worker activity.

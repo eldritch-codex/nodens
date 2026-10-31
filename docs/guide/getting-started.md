@@ -70,7 +70,7 @@ cmake_minimum_required(VERSION 3.30)
 # FetchContent or add_subdirectory().
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 
-project(NodensApp VERSION 0.1.1 LANGUAGES CXX)
+project(NodensApp VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -81,7 +81,7 @@ include(FetchContent)
 
 FetchContent_Declare(nodens
     GIT_REPOSITORY https://github.com/eldritch-codex/nodens.git
-    GIT_TAG        v0.1.1 # A release tag; change it to move to a newer Nodens release
+    GIT_TAG        v0.3.0 # A release tag; change it to move to a newer Nodens release
 )
 FetchContent_MakeAvailable(nodens)
 
@@ -126,7 +126,7 @@ int main() {
 
 Change the tag in `FetchContent_Declare` to a release from the [Nodens releases](https://github.com/eldritch-codex/nodens/releases), then reconfigure and build again.
 
-**Success looks like** a clean build against the new tag. While Nodens is at 0.x, a release that changes the API bumps the minor version, so read the [changelog](../../CHANGELOG.md) before moving from 0.1 to 0.2.
+**Success looks like** a clean build against the new tag. While Nodens is at 0.x, a release that changes the API bumps the minor version, so read the [changelog](../../CHANGELOG.md) before moving to a newer minor version.
 
 ### 7. Develop the framework and your application together
 

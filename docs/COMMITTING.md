@@ -45,3 +45,5 @@ Pull requests are squash-merged, so the **PR title becomes the commit on `main`*
 ## The changelog
 
 [`CHANGELOG.md`](../CHANGELOG.md) is written by hand in the Keep a Changelog sections (`Added`, `Changed`, `Fixed`, ...). A `feat`, `fix` or breaking change adds a line under `Unreleased` in the same pull request. `docs`, `build`, `ci`, `style`, `chore` and most `refactor` commits need none.
+
+An entry is one line: what changed and, for a breaking change, what the reader must do, led by `**Breaking:**`. The reasoning belongs in the pull request, so end the line with a link to it, or to the commit when there was no pull request. Write the link as a full URL, because the release job publishes the section alone as the release notes. The number is not known until the pull request is open, so add the link then, or at the latest in the release preparation pull request.

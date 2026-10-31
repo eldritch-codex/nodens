@@ -8,61 +8,60 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ### Added
 
-- `scripts/check-docs-links.sh` fails on a relative Markdown link under `docs/` that points at a path missing from the tree. The CI `docs` job runs it.
-- `docs/STYLE.md` states the writing standard for every page: three page shapes, a glossary every page shares, the voice each folder uses, and a checklist to apply before a pull request.
-- `FPacingConfig::Pacing` selects a fixed-step mode (`EPacing::Fixed`) next to the default variable one: the pacer accumulates wall time into steps of `FixedDelta`, caps catch-up at `MaxStepsPerFrame`, and sleeps to the step boundary so the loop does not spin. `examples/headlesspulse --fixed` runs it, and the example ends each run with a summary of steps, simulated time, wall time and time per step, so the two modes compare run by run.
-- `TaskSystem::Submit` moves the callable and its arguments into the task, which is built from a lambda and `std::invoke` instead of `std::bind` and a `std::shared_ptr<std::packaged_task>`. A move-only argument now reaches a by-value parameter, `std::bind`'s decayed copies are gone, and the shared_ptr node, with its copy taken when the task was queued, is no longer allocated. `Submit` is also constrained on the decayed callable and argument types, which is what the task invokes.
+- Fixed-step pacing: set `FPacingConfig::Pacing` to `EPacing::Fixed` to advance the loop in steps of `FixedDelta`. `examples/headlesspulse --fixed` shows it. ([#50](https://github.com/eldritch-codex/nodens/pull/50))
+- `scripts/check-docs-links.sh` fails CI on a broken relative link under `docs/`. ([#49](https://github.com/eldritch-codex/nodens/pull/49))
+- `docs/STYLE.md`, the writing standard for the guide. ([#51](https://github.com/eldritch-codex/nodens/pull/51))
 
 ### Changed
 
-- `FApplicationConfig` states its window and overlay choice as one `EPresentation` value (`Window`, `WindowImGUI`, `Headless`) instead of the `EnableGUI` and `CreateWindow` booleans, which could express a GUI with no window. `HasWindow()` reads that value, and a config that set either boolean moves to the new field.
-- `Application::Run()` takes each frame's time from the new `Nodens.FramePacer` module instead of reading the window, and clamps it to `FPacingConfig::MaxFrameDelta` (250 ms by default), so a dragged window or a suspended process no longer reaches layers as one long step. `FApplicationConfig` gains `Pacing` for the policy, and the old `m_LastFrameTime` member is gone.
-- The guide's pages follow that standard. A concept page runs problem, mechanism, what still goes wrong, remedies, a worked case and references; a how-to page carries prerequisites, numbered steps and troubleshooting; and one word means one thing throughout: iteration for a pass of the loop, step for one simulation advance, and frame only for the image the display shows. The custom-layer walkthrough's sample layer is renamed `IterationStatsLayer`, since the number it smooths is an iteration's duration.
-- Every change goes through a short-lived branch and a squashed pull request, whatever its type. The direct-to-`main` route for `docs`, `style`, `chore` and tooling `build` commits is removed. See `docs/BRANCHING.md`.
-- The tutorial and architecture pages moved from the GitHub wiki into `docs/guide/`, one page per file, with an index at `docs/guide/README.md` and every link written as a repo-relative path. The pages ship with the code, so a change to an API and its explanation land in one commit.
-- `docs/` is split by audience: `guide/` for application writers, `dev/` for the design notes on backends, C++ modules, dependencies and type names, and the branching and committing pages at the root, with `docs/README.md` as the index of all three.
-- The CMake option `ND_BUILD_TRACY_PROFILER` is renamed `ND_ADD_TRACY_PROFILER_TARGET`, since it adds the `tracy-profiler` target rather than building it: the target stays out of the default build and is built by name. The default is now `ON`, which only declares the target; a configuration that passed the old option must pass the new one.
+- **Breaking:** `FApplicationConfig` takes one `EPresentation` value (`Window`, `WindowImGUI`, `Headless`) in place of the `EnableGUI` and `CreateWindow` booleans. ([#50](https://github.com/eldritch-codex/nodens/pull/50))
+- **Breaking:** the CMake option `ND_BUILD_TRACY_PROFILER` is now `ND_ADD_TRACY_PROFILER_TARGET`, and it defaults to `ON`. ([a9f155d](https://github.com/eldritch-codex/nodens/commit/a9f155d))
+- `Application::Run()` takes frame time from the new `Nodens.FramePacer` module and clamps it to `FPacingConfig::MaxFrameDelta` (250 ms by default). ([#50](https://github.com/eldritch-codex/nodens/pull/50))
+- `TaskSystem::Submit` accepts move-only arguments and no longer allocates a `std::shared_ptr`. ([15403cc](https://github.com/eldritch-codex/nodens/commit/15403cc))
+- The tutorial and architecture pages moved from the wiki into `docs/guide/`, and `docs/` is split into `guide/`, `dev/` and the branching and committing pages. ([#49](https://github.com/eldritch-codex/nodens/pull/49))
+- The guide follows the new style standard. ([#51](https://github.com/eldritch-codex/nodens/pull/51))
+- Every change goes through a pull request, including `docs`, `style`, `chore` and tooling `build`. See `docs/BRANCHING.md`. ([#49](https://github.com/eldritch-codex/nodens/pull/49))
 
 ### Removed
 
-- `scripts/check.sh`. Every change now gets a CI run on its pull request before it lands, so the local copy of the CI steps is gone.
+- `scripts/check.sh`, since CI now runs on every pull request. ([#49](https://github.com/eldritch-codex/nodens/pull/49))
 
 ## [0.2.1] - 2026-10-27
 
 ### Added
 
-- `scripts/check.sh` runs the format check on the changed C++ files and a Debug build in `build/check`, in the dev container. It is the check to run before a direct commit that touches C++ or the build.
+- `scripts/check.sh` runs the format check and a Debug build in the dev container. ([dc42eba](https://github.com/eldritch-codex/nodens/commit/dc42eba))
 
 ### Changed
 
-- Small changes (`docs`, `style`, `chore`, tooling `build`) are committed directly to `main`, and risky ones (`feat`, `fix`, `refactor`, `perf`, `ci`, and `build` that changes `CMakeLists.txt` or a dependency version) go through a squashed pull request. A failing `main` is fixed before anything else, and a tag is created only on a commit whose CI run succeeded. See `docs/BRANCHING.md`.
-- The Zed tasks and debug scenarios run in the dev container through the Dev Containers CLI (`@devcontainers/cli`), and `.zed/docker.sh` is gone. The CLI reads the same `devcontainer.json` as the editor, so the container is not described twice. Both GPU configurations mount the project at its host path, so build outputs and debugger source paths match the host.
+- Small changes were committed directly to `main` and risky ones went through a pull request. See `docs/BRANCHING.md`. ([99cd378](https://github.com/eldritch-codex/nodens/commit/99cd378))
+- The Zed tasks and debug scenarios run in the dev container through the Dev Containers CLI, and `.zed/docker.sh` is gone. ([240a39d](https://github.com/eldritch-codex/nodens/commit/240a39d))
 
 ## [0.2.0] - 2026-10-27
 
 ### Changed
 
-- The job system type is `TaskSystem`, renamed from `JobSystem`, and the accessor is `Application::GetTaskSystem()`. In the engine literature a job system drains a queue of jobs that run to completion, with coroutines or fibers for jobs that sleep and counters to join a batch (Gregory 2019, pp. 553-555), while this pool takes one callable and returns a future; see `docs/naming.md`.
-- The graphics types are `IGraphicsBackend`, `OpenGLBackend` and `VulkanBackend`, renamed from `IGraphicsContext`, `OpenGLContext` and `VulkanContext`, and `IWindow::GetBackend()` replaces `GetGraphicsContext()`. The interface covers backend initialization and frame presentation, and Vulkan owns an instance, a device and a swapchain rather than a context, so the shared word cannot be context; the window's member is `m_Backend`.
-- The theme enum is `ETheme`, renamed from `EDefaultTheme`. Its first member is `None`, so the word default belongs to the appliers, which keep their names, and the theme field on `FApplicationConfig` is `Theme`; the module keeps the name `Nodens.DefaultTheme`.
-- The startup structs are `FWindowConfig` and `FApplicationConfig`, renamed from `FWindowProps` and `FApplicationSpecification`, and the names that hold them follow: the window factory and the `Application` constructor take `config`, and the examples hold `appConfig`. `FWindowConfig::API` is now `GraphicsAPI`, matching the enum and the application config.
+- **Breaking:** `JobSystem` is now `TaskSystem`, and the accessor is `Application::GetTaskSystem()`. ([1b2f856](https://github.com/eldritch-codex/nodens/commit/1b2f856))
+- **Breaking:** `IGraphicsContext`, `OpenGLContext` and `VulkanContext` are now `IGraphicsBackend`, `OpenGLBackend` and `VulkanBackend`, and `IWindow::GetBackend()` replaces `GetGraphicsContext()`. ([e04f193](https://github.com/eldritch-codex/nodens/commit/e04f193))
+- **Breaking:** `EDefaultTheme` is now `ETheme`, and the theme field on `FApplicationConfig` is `Theme`. ([96df9d3](https://github.com/eldritch-codex/nodens/commit/96df9d3))
+- **Breaking:** `FWindowProps` and `FApplicationSpecification` are now `FWindowConfig` and `FApplicationConfig`, and `FWindowConfig::API` is now `GraphicsAPI`. ([e1d8622](https://github.com/eldritch-codex/nodens/commit/e1d8622))
 
 ## [0.1.1] - 2026-10-27
 
 ### Changed
 
-- ImPlot is fetched at `v1.1`, up from `v1.0`.
-- The dev container has one configuration per GPU type, `.devcontainer/nvidia` and `.devcontainer/dri`, instead of a single file edited by hand. `docker.sh` picks one, and `NODENS_GPU` overrides it.
-- The shared Zed tasks and debug scenarios are tracked in the repository, and they run from the project root even when the Zed workspace is a parent folder.
+- ImPlot is fetched at `v1.1`, up from `v1.0`. ([9f61e54](https://github.com/eldritch-codex/nodens/commit/9f61e54))
+- The dev container has one configuration per GPU type, `.devcontainer/nvidia` and `.devcontainer/dri`. ([#39](https://github.com/eldritch-codex/nodens/pull/39))
+- The shared Zed tasks and debug scenarios are tracked in the repository. ([#39](https://github.com/eldritch-codex/nodens/pull/39))
 
 ### Fixed
 
-- Configuring without the Vulkan SDK prints a warning. Before, the build was silently OpenGL-only and exited at startup under the default Vulkan API.
-- The `circularwave3d` example advances by the frame time, so the curve no longer scrolls faster at a higher frame rate.
-- GLFW is fetched at its pinned tag. It was declared but never made available, so the build linked the system copy.
-- `ND_BUILD_EXAMPLES` defaults to off when Nodens is consumed by another project. The default was on, because the second `option()` call was a no-op.
-- The `MouseButtonReleased` event has a name. It was empty, so the event logged as an empty string and the file failed to compile with GCC.
-- `EventBus::Subscribe` takes the registry lock, and `QueueEvent` no longer reads the subscriber list unlocked for its trace line, so subscribing or queueing a new event type from another thread no longer races on that list.
+- Configuring without the Vulkan SDK prints a warning instead of building silently OpenGL-only. ([#40](https://github.com/eldritch-codex/nodens/pull/40))
+- `circularwave3d` advances by the frame time, so it no longer runs faster at a higher frame rate. ([#41](https://github.com/eldritch-codex/nodens/pull/41))
+- GLFW is fetched at its pinned tag instead of linking the system copy. ([#45](https://github.com/eldritch-codex/nodens/pull/45))
+- `ND_BUILD_EXAMPLES` defaults to off when Nodens is consumed by another project. ([#45](https://github.com/eldritch-codex/nodens/pull/45))
+- `MouseButtonReleased` has a name, which fixes an empty log string and a GCC compile error. ([#46](https://github.com/eldritch-codex/nodens/pull/46))
+- `EventBus` no longer races on the subscriber list when another thread subscribes or queues an event. ([#46](https://github.com/eldritch-codex/nodens/pull/46))
 
 ## [0.1.0] - 2026-10-24
 

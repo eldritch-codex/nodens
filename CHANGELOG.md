@@ -4,6 +4,8 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-31
+
 ### Added
 
 - `scripts/check-docs-links.sh` fails on a relative Markdown link under `docs/` that points at a path missing from the tree. The CI `docs` job runs it.

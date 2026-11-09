@@ -4,6 +4,10 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+
+- `TaskSystem::SubmitStoppable` passes the task a `std::stop_token` and returns an `FStoppableTaskHandle` with the future and a `std::stop_source`. The token is also stopped when the `TaskSystem` is destroyed, so a running stoppable task no longer holds up shutdown.
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

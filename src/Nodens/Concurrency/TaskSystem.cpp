@@ -45,6 +45,9 @@ TaskSystem::TaskSystem()
 TaskSystem::~TaskSystem()
 {
     // SHUTDOWN SEQUENCE
+    // Tell running stoppable tasks first, so they can finish before the join below.
+    m_Shutdown.request_stop();
+
     // Ask all threads to stop. Ideally, they finish their current task and then
     // see this.
     for (auto& thread : m_Threads)
@@ -60,6 +63,17 @@ TaskSystem::~TaskSystem()
     // Because they are std::jthread, they will automatically perform a .join()
     // waiting for the threads to actually finish execution before this object
     // dies.
+}
+
+void TaskSystem::Enqueue(std::move_only_function<void()> task)
+{
+    {
+        std::unique_lock lock(m_QueueMutex);
+        m_Tasks.emplace(std::move(task));
+        TracyPlot("Job Queue Size", (int64_t)m_Tasks.size());
+    }
+
+    m_Condition.notify_one();
 }
 
 void TaskSystem::WorkerLoop(std::stop_token stoken)

@@ -84,6 +84,8 @@ void EventBus::Flush()
                 CoreLogger().error("Dispatch function for Event type `{}` (typeId={}) not defined.",
                                    m_RegisteredEventsNames[typeId],
                                    typeId);
+                // Drop the bytes, or the same error repeats on every Flush.
+                readBuffer.clear();
                 continue;
             }
         }

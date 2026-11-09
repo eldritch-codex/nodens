@@ -119,10 +119,13 @@ public:
     }
 
     /// @brief Check if an event type is registered.
+    /// @details A type is registered once it has a dispatch function. The tables grow to hold the
+    /// highest ID seen, so a smaller ID can sit inside them with no dispatch function yet.
     /// @note EventTypeIDs start at 0.
     inline bool IsEventTypeRegistered(EventTypeID typeId)
     {
-        return typeId < m_DispatchTable.size();
+        std::lock_guard lock(m_RegistryMutex);
+        return typeId < m_DispatchTable.size() && static_cast<bool>(m_DispatchTable[typeId]);
     }
 
     /// @brief Drains the async event queue, dispatching all deferred events.
@@ -171,16 +174,24 @@ private:
 
         auto newRegisteredEventsCount = typeId + 1;
 
+        // Types register in the order they are first used, not in ID order, so the storage only
+        // ever grows. Shrinking would drop what a type with a higher ID registered earlier.
         {
             std::lock_guard lock(m_BufferMutex);
-            m_Buffers[0].resize(newRegisteredEventsCount);
-            m_Buffers[1].resize(newRegisteredEventsCount);
+            for (auto& buffers : m_Buffers)
+            {
+                if (buffers.size() < newRegisteredEventsCount)
+                    buffers.resize(newRegisteredEventsCount);
+            }
         }
         {
             std::lock_guard lock(m_RegistryMutex);
-            m_Subscribers.resize(newRegisteredEventsCount);
-            m_DispatchTable.resize(newRegisteredEventsCount);
-            m_RegisteredEventsNames.resize(newRegisteredEventsCount);
+            if (m_DispatchTable.size() < newRegisteredEventsCount)
+            {
+                m_Subscribers.resize(newRegisteredEventsCount);
+                m_DispatchTable.resize(newRegisteredEventsCount);
+                m_RegisteredEventsNames.resize(newRegisteredEventsCount);
+            }
 
             m_RegisteredEventsNames[typeId] = TEvent::Name;
             m_DispatchTable[typeId] = [this, typeId](std::byte* data, std::size_t size)

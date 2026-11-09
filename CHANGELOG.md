@@ -4,6 +4,11 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+
+- `TaskSystem::SubmitStoppable` passes the task a `std::stop_token` and returns an `FStoppableTaskHandle` with the future and a `std::stop_source`. The token is also stopped when the `TaskSystem` is destroyed, so a running stoppable task no longer holds up shutdown. ([#55](https://github.com/eldritch-codex/nodens/pull/55))
+- A GoogleTest target, `task-system-tests`, built with `ND_BUILD_TESTS` (on in Nodens' own build, off when consumed) and run by CI through `ctest`. See `docs/dev/testing.md`. ([#55](https://github.com/eldritch-codex/nodens/pull/55))
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

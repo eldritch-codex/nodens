@@ -38,7 +38,7 @@ A task is one callable plus its arguments, captured by value at submit time. The
 
 - **Size.** `hardware_concurrency() - 1` workers, so one core stays free for the main thread, and one worker if the machine reports a single hardware thread.
 - **Names.** `Worker 0`, `Worker 1`, and so on, which appear as separate tracks in Tracy.
-- **Shutdown.** When the `Application` is destroyed, each worker finishes the task it is running and exits.
+- **Shutdown.** When the `Application` is destroyed, each worker finishes the task it is running and exits. A task submitted with `SubmitStoppable` is asked to stop first.
 
 ### Why `Submit` does not use `std::bind`
 
@@ -108,6 +108,31 @@ Nodens::Application::Get().GetTaskSystem().Submit(
 
 The PlanetaryScan example does this: the layer subscribes in `OnAttach`, each task ends with `QueueEvent`, and the bus delivers the results on the main thread at the start of the next iteration. [Event System](./event-system.md) covers the bus, and [Examples Guide](./examples-guide.md) the whole example.
 
+### Stopping a task
+
+A task that runs for seconds, such as a search or a network read, should end early when the user replaces it or closes the window. `SubmitStoppable` passes the task a `std::stop_token` as its first argument and returns a handle with the future and a `std::stop_source`:
+
+```cpp
+auto handle = tasks.SubmitStoppable(
+    [](std::stop_token stop, std::string query)
+    {
+        std::vector<Hit> hits;
+        for (const auto& page : Pages())
+        {
+            if (stop.stop_requested())
+                return hits; // the partial result; the caller decides what to do with it
+            Search(page, query, hits);
+        }
+        return hits;
+    },
+    "dagon");
+
+handle.Stop.request_stop(); // the user typed a new query
+auto hits = handle.Result.get();
+```
+
+The token is stopped when the caller requests a stop on `handle.Stop`, and when the `TaskSystem` is destroyed while the task runs. The task stops only where it checks the token, so check it between the steps of long work. A queued task that has not started is not stopped by either: it is discarded at shutdown like any other.
+
 ## What still goes wrong
 
 **A blocking `get()` on the main thread.** It waits for the task, which freezes the window for exactly as long as the work takes.
@@ -122,7 +147,9 @@ The PlanetaryScan example does this: the layer subscribes in `OnAttach`, each ta
 
 **An exception lost in the future.** A task that throws rethrows on the main thread when the result is collected, and nowhere else.
 
-**Priorities, cancellation or dependencies.** The pool provides none of them.
+**A stoppable task that never checks its token.** The stop request reaches the token and nothing else, so the destructor waits for the task to return.
+
+**Priorities or dependencies.** The pool provides neither.
 
 ## Remedies
 
@@ -138,7 +165,9 @@ The PlanetaryScan example does this: the layer subscribes in `OnAttach`, each ta
 
 **Collect every future you rely on.** An exception surfaces only when the result is read.
 
-**Build missing behaviour on futures.** Priorities, cancellation and dependencies are application-level concerns on top of `Submit`, not pool features.
+**Check the token between steps.** A long task polls `stop.stop_requested()` at each step and returns early.
+
+**Build missing behaviour on futures.** Priorities and dependencies are application-level concerns on top of `Submit`, not pool features.
 
 ## A worked case
 
@@ -174,6 +203,7 @@ With the event form, the same work looks like this:
 3. Capture by value, and prefer moving data into the task over sharing it.
 4. Poll futures with `wait_for(0)`, and collect every result you depend on.
 5. Do not wait for an unstarted task at shutdown.
+6. Use `SubmitStoppable` for work that can run long, and check its token between steps.
 
 ## See Also
 

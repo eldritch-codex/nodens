@@ -34,8 +34,10 @@ option(ND_ENABLE_VULKAN "Build the Vulkan backend when Vulkan is available" ON)
 # is chosen before the one option() call: a second call for the same name would be a no-op.
 if(PROJECT_IS_TOP_LEVEL)
     option(ND_BUILD_EXAMPLES "Build the Nodens example applications" ON)
+    option(ND_BUILD_TESTS "Build the Nodens tests" ON)
 else()
     option(ND_BUILD_EXAMPLES "Build the Nodens example applications" OFF)
+    option(ND_BUILD_TESTS "Build the Nodens tests" OFF)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -242,6 +244,14 @@ endif()
 # -----------------------------------------------------------------------------
 if(ND_BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+# -----------------------------------------------------------------------------
+# Tests
+# -----------------------------------------------------------------------------
+if(ND_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
 
 # -----------------------------------------------------------------------------

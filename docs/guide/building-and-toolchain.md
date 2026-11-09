@@ -63,6 +63,7 @@ cmake --build build
 | `ND_ENABLE_OPENGL` | `ON` | Builds the OpenGL backend |
 | `ND_ENABLE_VULKAN` | `ON` | Builds the Vulkan backend when Vulkan is available |
 | `ND_BUILD_EXAMPLES` | `ON` when Nodens is top-level, `OFF` when consumed | Adds the example applications |
+| `ND_BUILD_TESTS` | `ON` when Nodens is top-level, `OFF` when consumed | Adds the GoogleTest targets, run with `ctest`; see [Testing](../dev/testing.md) |
 | `ND_ADD_TRACY_PROFILER_TARGET` | `ON` | Adds the Tracy GUI as the `tracy-profiler` target, excluded from the default build |
 
 ```shell
@@ -131,7 +132,7 @@ Declarations are centralized in `cmake/NodensDependencies.cmake`:
 | ImPlot | `v1.1` |
 | ImPlot3D | `v0.4` |
 
-ImGui, ImPlot and ImPlot3D are built from source by the project's own CMake files. Nodens provides no installable or exported CMake package; consumers use `FetchContent` or `add_subdirectory`, as in [Getting Started](./getting-started.md).
+GoogleTest `v1.18.0` is also declared there, and only a build with `ND_BUILD_TESTS` on fetches it. ImGui, ImPlot and ImPlot3D are built from source by the project's own CMake files. Nodens provides no installable or exported CMake package; consumers use `FetchContent` or `add_subdirectory`, as in [Getting Started](./getting-started.md).
 
 ### The development image
 

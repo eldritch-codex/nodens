@@ -25,6 +25,7 @@ How the framework is built, and why it is shaped this way:
 - [Backends](dev/backends.md): choosing a graphics backend, and which layer owns what.
 - [C++ modules and the build](dev/cpp-modules.md): the module layout, `import std`, and third-party headers.
 - [Dependencies](dev/dependencies.md): the fetched libraries, the ImGui stack, and how to change a pin.
+- [Testing](dev/testing.md): the GoogleTest setup, how to run the tests, and how to add one.
 - [Type names](dev/naming.md): why the graphics interface is a backend, and why the pool is `TaskSystem`.
 
 ## Process

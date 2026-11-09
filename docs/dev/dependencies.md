@@ -9,6 +9,7 @@ Every third-party library is declared in `cmake/NodensDependencies.cmake` and pi
 - Nothing is found on the system. A library that CMake cannot fetch is a configure error, not a fallback to whatever the distribution installed.
 - ImGui, ImPlot and ImPlot3D have no CMake build upstream, so `cmake/NodensImGui.cmake` creates the `ImGui` target from the fetched sources, with `CXX_MODULE_STD OFF`.
 - glad is vendored in `vendor/glad` and added only when `ND_ENABLE_OPENGL` is on.
+- GoogleTest is the one test-only pin. `tests/CMakeLists.txt` makes it available, so a build with `ND_BUILD_TESTS` off never fetches it. See [Testing](testing.md).
 - `TRACY_ENABLE` is forced to `OFF` in the cache. Only the `Profiling` configuration defines it, on the `TracyClient` target.
 
 ## Why

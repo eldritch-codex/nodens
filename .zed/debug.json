@@ -14,7 +14,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
+                "sudo devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },
@@ -32,7 +32,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
+                "sudo devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },

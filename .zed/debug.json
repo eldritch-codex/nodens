@@ -14,7 +14,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "sudo devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
+                "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },
@@ -32,7 +32,7 @@
             "command": "bash",
             "args": [
                 "-c",
-                "sudo devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
+                "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json && sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build",
             ],
             "cwd": "$ZED_MAIN_GIT_WORKTREE",
         },

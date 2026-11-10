@@ -8,7 +8,7 @@
     {
         "label": "[Nodens] Docker: Start",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer up --workspace-folder . --config .devcontainer/nvidia/devcontainer.json",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -36,7 +36,7 @@
     {
         "label": "[Nodens] Config Debug",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -50,7 +50,7 @@
     {
         "label": "[Nodens] Config Release",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Release",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Release",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -64,7 +64,7 @@
     {
         "label": "[Nodens] Config Profiling",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Profiling -DND_BUILD_TRACY_PROFILER=ON",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake -B build -S . -DCMAKE_BUILD_TYPE=Profiling -DND_BUILD_TRACY_PROFILER=ON",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -78,7 +78,7 @@
     {
         "label": "[Nodens] Build",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build -j4",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build -j4",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -92,7 +92,7 @@
     {
         "label": "[Nodens] Build Clean",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --clean-first -j4",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --clean-first -j4",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -106,7 +106,7 @@
     {
         "label": "[Nodens] Build Tracy Profiler",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --target tracy-profiler",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json cmake --build build --target tracy-profiler",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -120,7 +120,7 @@
     {
         "label": "[Nodens] Run PlanetaryScan",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/planetaryscan/example-planetaryscan",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/planetaryscan/example-planetaryscan",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -134,7 +134,7 @@
     {
         "label": "[Nodens] Run CircularWave3D",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/circularwave3d/example-circularwave3d",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/circularwave3d/example-circularwave3d",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -148,7 +148,7 @@
     {
         "label": "[Nodens] Run HeadlessPulse",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/headlesspulse/example-headlesspulse --fixed",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/examples/headlesspulse/example-headlesspulse --fixed",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",
@@ -162,7 +162,7 @@
     {
         "label": "[Nodens] Run TracyProfiler",
         "cwd": "$ZED_MAIN_GIT_WORKTREE",
-        "command": "sudo devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/tracy-profiler/bin/tracy-profiler",
+        "command": "sudo --preserve-env=XDG_RUNTIME_DIR,DISPLAY,WAYLAND_DISPLAY devcontainer exec --workspace-folder . --config .devcontainer/nvidia/devcontainer.json ./build/tracy-profiler/bin/tracy-profiler",
         "use_new_terminal": true,
         "allow_concurrent_runs": false,
         "reveal": "always",

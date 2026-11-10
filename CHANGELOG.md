@@ -4,6 +4,8 @@ All notable changes to Nodens are recorded here. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-10
+
 ### Added
 
 - `TaskSystem::SubmitStoppable` passes the task a `std::stop_token` and returns an `FStoppableTaskHandle` with the future and a `std::stop_source`. The token is also stopped when the `TaskSystem` is destroyed, so a running stoppable task no longer holds up shutdown. ([#55](https://github.com/eldritch-codex/nodens/pull/55))
